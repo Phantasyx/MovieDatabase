@@ -107,6 +107,7 @@
   }
 
   function setFlash(message) { flash = message || ""; }
+  function peekFlash() { return flash; }
   function takeFlash() {
     var value = flash;
     flash = "";
@@ -360,6 +361,7 @@
     logout: logout,
     reset: reset,
     setFlash: setFlash,
+    peekFlash: peekFlash,
     takeFlash: takeFlash,
     addRequest: addRequest,
     dismissRequest: dismissRequest,

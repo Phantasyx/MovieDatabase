@@ -184,7 +184,7 @@
     var note = user ? '<p class="hint">You are signed in as ' + esc(displayName(user.name)) + ". You can switch accounts.</p>" : "";
     var cards = FelisStore.users().map(function (account) {
       var changed = account.password !== account.seedPassword ? " (changed in this browser)" : "";
-      return '<article class="account"><h3>' + esc(displayName(account.name)) + "</h3><p>" + esc(roleLabel(account.role)) + "</p><p><strong>" + esc(account.email) + "</strong><br>" + esc(account.password) + esc(changed) + "</p>" +
+      return '<article class="account"><h3>' + esc(displayName(account.name)) + "</h3><p class=\"hint\">" + esc(roleLabel(account.role)) + "</p><p class=\"cred\"><strong>" + esc(account.email) + "</strong><br>" + esc(account.password) + esc(changed) + "</p>" +
         '<button type="button" class="button secondary small" data-action="fill-login" data-email="' + esc(account.email) + '" data-password="' + esc(account.password) + '">Use this account</button></article>';
     }).join("");
     return {
@@ -307,8 +307,8 @@
         '<p class="actions"><a class="button primary" href="#/case/new">Add case</a></p></div>' +
         '<form data-action="delete-case"><p class="actions"><button class="button danger" type="submit">Delete selected</button></p>' +
         '<p class="hint" id="case-count">' + filteredCases().length + " shown</p>" +
-        '<table class="stack"><thead><tr><th>Select</th><th>Number</th><th>Client</th><th>Agent</th><th>Summary</th><th>Latest</th><th>Status</th></tr></thead><tbody id="case-rows">' +
-        caseRowsHtml() + "</tbody></table></form>"
+        '<div class="table-wrap"><table class="stack"><thead><tr><th>Select</th><th>Number</th><th>Client</th><th>Agent</th><th>Summary</th><th>Latest</th><th>Status</th></tr></thead><tbody id="case-rows">' +
+        caseRowsHtml() + "</tbody></table></div></form>"
     };
   }
 
@@ -524,11 +524,8 @@
 
   function navigate(hash) {
     pageError = "";
-    if (location.hash === hash) {
-      if (!rendering) render();
-      return;
-    }
-    location.hash = hash;
+    if (location.hash !== hash) location.hash = hash;
+    if (!rendering) render();
   }
 
   function render() {
@@ -553,11 +550,15 @@
       navigate("#/staff");
       return;
     }
+    var key = parts.join("/") || "home";
+    if (key === lastKey && !pageError && !FelisStore.peekFlash()) {
+      rendering = false;
+      return;
+    }
     var view = viewFor(parts, user);
     var app = document.getElementById("app");
     app.innerHTML = shell(view.html, user, parts);
     document.title = view.title === "Felis Investigations" ? view.title : view.title + " · Felis Investigations";
-    var key = parts.join("/") || "home";
     if (key !== lastKey) {
       lastKey = key;
       window.scrollTo(0, 0);
