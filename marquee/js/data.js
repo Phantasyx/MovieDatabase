@@ -3,8 +3,8 @@
   var SEED = {
     version: 3,
     users: [
-      { id: "u-mina", email: "mina@marquee.demo", name: "Mina Cole", role: "reviewer", password: "demo-reviewer", seedPassword: "demo-reviewer", favorites: [], preferences: { reminders: false, quiet: true } },
-      { id: "u-sam", email: "sam@marquee.demo", name: "Sam Ortiz", role: "reader", password: "demo-reader", seedPassword: "demo-reader", favorites: [], preferences: { reminders: false, quiet: true } }
+      { id: "u-mina", email: "mina@marquee.demo", name: "Mina Cole", role: "reviewer", password: "demo-reviewer", seedPassword: "demo-reviewer", favorites: [], preferences: { reminders: false, quiet: true }, subscription: { plan: null, status: "none", nextBilling: null, last4: null, cardName: null, invoices: [] } },
+      { id: "u-sam", email: "sam@marquee.demo", name: "Sam Ortiz", role: "reader", password: "demo-reader", seedPassword: "demo-reader", favorites: [], preferences: { reminders: false, quiet: true }, subscription: { plan: null, status: "none", nextBilling: null, last4: null, cardName: null, invoices: [] } }
     ],
     films: [
       {

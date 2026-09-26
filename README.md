@@ -1,6 +1,6 @@
 # Marquee
 
-Marquee is a movie catalog. You browse Movies, save favorites, write reviews, and open a profile after you sign in. Favorites and reviews stay in the browser. Photographs are from Unsplash. [PhantasyX](https://phantasyx.com).
+Marquee is a movie catalog. You browse Movies, save favorites, write reviews, choose a plan, and open a profile after you sign in. Favorites, reviews, and billing stay in the browser. Photographs are from Unsplash. [PhantasyX](https://phantasyx.com).
 
 Sample reviews on a title are labeled as samples.
 

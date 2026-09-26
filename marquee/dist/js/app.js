@@ -2,7 +2,21 @@
 (function () {
   var FEATURED = "f-balcony";
   var GENRES = ["Drama", "Mystery", "Adventure", "Comedy", "Documentary", "Romance", "Science fiction"];
+  var PLAN_ONLY = {
+    "f-glass": true,
+    "f-salt": true,
+    "f-pines": true,
+    "f-piano": true,
+    "f-dune": true,
+    "f-archive": true,
+    "f-wheel": true,
+    "f-field": true,
+    "f-pass": true,
+    "f-guitar": true
+  };
   var pageError = "";
+  var confirmingCancel = false;
+  var pendingPlan = "";
   var shelfFilter = { q: "", genre: "all" };
   var returnHash = "#/";
   var lastKey = null;
@@ -100,6 +114,18 @@
     });
   }
 
+  function money(amount) {
+    return "$" + Number(amount).toFixed(2);
+  }
+
+  function needsPlan(filmId) {
+    return !!PLAN_ONLY[filmId];
+  }
+
+  function openCatalog(user) {
+    return MarqueeStore.hasCatalog(user);
+  }
+
   function creditsList() {
     return MarqueeStore.films().map(function (film) {
       return "<li>" + esc(film.title) + ' <a href="' + esc(film.photo) + '">Unsplash</a></li>';
@@ -113,13 +139,16 @@
       var current = false;
       if (id === "movies") current = isMovies(head);
       else if (id === "reviews") current = head === "reviews" || head === "notes";
+      else if (id === "plans") current = head === "plans" || head === "subscribe";
+      else if (id === "billing") current = head === "billing";
       else current = head === id;
       return '<a href="' + href + '"' + (current ? ' aria-current="page"' : "") + ">" + text + "</a>";
     }
-    var links = link("movies", "#/", "Movies");
+    var links = link("movies", "#/", "Movies") + link("plans", "#/plans", "Plans");
     if (user) {
       links += link("reviews", "#/reviews", "Your reviews");
       links += link("saved", "#/saved", "Saved");
+      links += link("billing", "#/billing", "Billing");
     } else {
       links += link("login", "#/login", "Sign in");
     }
@@ -157,7 +186,9 @@
     var avg = average(film.id);
     var score = avg == null ? "" : '<span class="poster-score">' + (Math.round(avg * 10) / 10).toFixed(1) + "</span>";
     var label = on ? "Remove " + film.title + " from favorites" : "Save " + film.title;
+    var lock = needsPlan(film.id) && !openCatalog(user) ? '<span class="lock">Plan</span>' : "";
     return '<div class="poster-wrap">' +
+      lock +
       '<button type="button" class="fav' + (on ? " is-on" : "") + '" data-action="favorite" data-film="' + esc(film.id) + '" aria-pressed="' + (on ? "true" : "false") + '" aria-label="' + esc(label) + '">' + heart() + "</button>" +
       '<a class="poster" href="#/film/' + esc(film.id) + '">' +
       '<img src="' + esc(film.image) + '" alt="" width="900" height="1200">' +
@@ -237,7 +268,9 @@
     var featured = MarqueeStore.filmById(FEATURED);
     return {
       title: filtering ? "Search" : (featured ? featured.title : "Marquee"),
-      html: (filtering ? "" : heroBlock()) + '<div class="shelf-tools">' + chipsBlock() + '</div><div class="rows">' + (filtering ? resultsBlock() : browseBlock()) + "</div>"
+      html: (filtering ? "" : heroBlock()) + '<div class="shelf-tools">' + chipsBlock() +
+        (openCatalog(MarqueeStore.current()) ? "" : '<p class="plan-note">Some titles are included with a plan. <a href="#/plans">See plans</a></p>') +
+        '</div><div class="rows">' + (filtering ? resultsBlock() : browseBlock()) + "</div>"
     };
   }
 
@@ -259,6 +292,26 @@
     var avg = average(film.id);
     var score = avg == null ? "No reviews yet" : (Math.round(avg * 10) / 10).toFixed(1) + " average";
     var mine = user ? MarqueeStore.userReview(user.id, film.id) : null;
+    var locked = needsPlan(film.id) && !openCatalog(user);
+    var quality = "";
+    if (openCatalog(user)) {
+      var activePlan = MarqueeStore.planById(user.subscription.plan);
+      if (activePlan) quality = "<li>" + esc(activePlan.quality) + "</li>";
+    }
+    if (locked) {
+      return {
+        title: film.title,
+        html:
+          '<section class="title-hero"><img src="' + esc(film.hero || film.image) + '" alt="" width="1600" height="900">' +
+          '<div class="title-copy"><p class="kicker"><a href="#/">Movies</a></p><h1 tabindex="-1">' + esc(film.title) + "</h1>" +
+          '<ul class="facts"><li>' + film.year + "</li><li>" + esc(film.genre) + "</li><li>" + film.minutes + " min</li></ul>" +
+          "<p>" + esc(film.logline) + "</p>" +
+          '<p class="actions">' + favoriteButton(film, user) + "</p></div></section>" +
+          '<div class="sheet"><div class="panel paywall"><h2>Included with a plan</h2>' +
+          "<p>This title opens with Basic, Standard, or Premium. Your favorites and reviews stay on your profile either way.</p>" +
+          '<p class="actions"><a class="btn btn-red" href="#/plans">See plans</a></p></div></div>'
+      };
+    }
     var composer;
     if (user && user.role === "reviewer") {
       composer = '<form id="review" data-action="save-review" data-film="' + esc(film.id) + '"><fieldset class="card"><legend>' + (mine ? "Edit your review" : "Write a review") + "</legend>" +
@@ -278,7 +331,7 @@
       html:
         '<section class="title-hero"><img src="' + esc(film.hero || film.image) + '" alt="" width="1600" height="900">' +
         '<div class="title-copy"><p class="kicker"><a href="#/">Movies</a></p><h1 tabindex="-1">' + esc(film.title) + "</h1>" +
-        '<ul class="facts"><li>' + film.year + "</li><li>" + esc(film.genre) + "</li><li>" + film.minutes + " min</li><li>" + esc(score) + "</li></ul>" +
+        '<ul class="facts"><li>' + film.year + "</li><li>" + esc(film.genre) + "</li><li>" + film.minutes + " min</li><li>" + esc(score) + "</li>" + quality + "</ul>" +
         "<p>" + esc(film.synopsis) + "</p>" +
         '<p class="actions">' + favoriteButton(film, user) + "</p></div></section>" +
         '<div class="sheet"><h2>Reviews</h2>' + (reviews.length ? reviews.map(reviewCard).join("") : '<p class="empty">No reviews on this title yet.</p>') +
@@ -313,24 +366,167 @@
     };
   }
 
+  function planSummary(user) {
+    var sub = user.subscription || { status: "none" };
+    if (sub.status === "active" && MarqueeStore.planById(sub.plan)) {
+      var plan = MarqueeStore.planById(sub.plan);
+      return "<p>You are on " + esc(plan.name) + ", " + money(plan.price) + " a month. Next billing date is " + esc(formatWhen(sub.nextBilling)) + ". Card ending " + esc(sub.last4) + ".</p>" +
+        '<p class="actions"><a class="btn btn-ghost" href="#/subscription">Manage subscription</a> <a class="btn btn-ghost" href="#/billing">Billing</a></p>';
+    }
+    if (sub.status === "paused" && MarqueeStore.planById(sub.plan)) {
+      var paused = MarqueeStore.planById(sub.plan);
+      return "<p>" + esc(paused.name) + " is paused. Billing is on hold, and the full catalog opens again when you resume.</p>" +
+        '<p class="actions"><a class="btn btn-red" href="#/subscription">Manage subscription</a> <a class="btn btn-ghost" href="#/billing">Billing</a></p>';
+    }
+    return "<p>You do not have an active plan. A plan opens the full catalog.</p>" +
+      '<p class="actions"><a class="btn btn-red" href="#/plans">See plans</a> <a class="btn btn-ghost" href="#/billing">Billing</a></p>';
+  }
+
   function profileView(user) {
     var prefs = user.preferences || { reminders: false, quiet: true };
     var ability = user.role === "reviewer"
       ? "This account can write reviews and save favorites."
       : "This account can read reviews and save favorites.";
+    var badge = "Member";
+    if (openCatalog(user)) badge = MarqueeStore.planById(user.subscription.plan).name;
+    else if (user.subscription && user.subscription.status === "paused") badge = "Paused";
     return {
       title: "Profile",
       html:
         '<div class="sheet plain profile">' +
         '<div class="profile-head"><span class="avatar" aria-hidden="true">' + esc(initials(user.name)) + "</span>" +
         '<div><p class="kicker">Signed in</p><h1 tabindex="-1">' + esc(user.name) + "</h1>" +
-        '<p class="profile-email">' + esc(user.email) + '</p><p><span class="badge">Demo member</span></p></div></div>' +
+        '<p class="profile-email">' + esc(user.email) + '</p><p><span class="badge">' + esc(badge) + "</span></p></div></div>" +
         "<p>" + ability + "</p>" +
+        "<h2>Subscription</h2>" + planSummary(user) +
         '<h2>Preferences</h2>' +
         '<p class="lede">These switches stay in this browser. Marquee does not send email, and it does not play video. They do not hide movies from the catalog.</p>' +
         '<label class="check"><input type="checkbox" data-action="pref" data-pref="reminders"' + (prefs.reminders ? " checked" : "") + "> Remind me about new sample titles</label>" +
         '<label class="check"><input type="checkbox" data-action="pref" data-pref="quiet"' + (prefs.quiet ? " checked" : "") + "> Keep the catalog quiet</label>" +
         '<p class="actions"><a href="#/reviews">Your reviews</a> <a href="#/saved">Saved favorites</a></p></div>'
+    };
+  }
+
+  function plansView(user) {
+    var current = openCatalog(user) ? user.subscription.plan : "";
+    var cards = MarqueeStore.plans().map(function (plan) {
+      var featured = plan.id === "standard" ? " is-featured" : "";
+      var onThis = current === plan.id;
+      var cta = onThis
+        ? '<span class="btn btn-light">Current plan</span>'
+        : '<a class="btn btn-red" href="#/subscribe/' + plan.id + '">Subscribe</a>';
+      var popular = plan.id === "standard" ? '<p class="kicker">Most popular</p>' : "<p class=\"kicker\">Monthly</p>";
+      return '<article class="plan' + featured + '">' + popular + "<h2>" + esc(plan.name) + "</h2>" +
+        '<p class="plan-price">' + money(plan.price) + ' <span>a month</span></p>' +
+        "<ul><li>Watch on " + esc(plan.screens) + "</li><li>" + esc(plan.quality) + " on open titles</li><li>Full catalog, favorites, and reviews</li><li>Cancel whenever you want</li></ul>" +
+        cta + "</article>";
+    }).join("");
+    return {
+      title: "Plans",
+      html: '<div class="sheet plans-wrap"><p class="kicker">Marquee</p><h1 tabindex="-1">Choose a plan</h1>' +
+        '<p class="lede">Open the full catalog on the plan that fits how you watch. You can change or cancel from your profile, and billing stays on this account.</p>' +
+        '<div class="plan-grid">' + cards + "</div></div>"
+    };
+  }
+
+  function subscribeView(user, planId) {
+    var plan = MarqueeStore.planById(planId);
+    if (!plan) return missingView();
+    return {
+      title: "Subscribe",
+      html: '<div class="sheet narrow"><p class="kicker"><a href="#/plans">' + esc(plan.name) + '</a></p><h1 tabindex="-1">Subscribe to ' + esc(plan.name) + "</h1>" +
+        "<p class=\"lede\">" + money(plan.price) + " a month, billed to the card you enter here. You can change or cancel from your profile.</p>" +
+        '<form data-action="subscribe" data-plan="' + esc(plan.id) + '"><fieldset class="card"><legend>Billing</legend>' +
+        '<p><label for="card-name">Name on card</label><input id="card-name" name="name" type="text" autocomplete="cc-name" required></p>' +
+        '<p><label for="card-number">Card number</label><input id="card-number" name="card" type="text" inputmode="numeric" autocomplete="cc-number" required></p>' +
+        '<p class="split"><label for="card-expiry">Expiry</label><input id="card-expiry" name="expiry" type="text" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/YY" required></p>' +
+        '<p class="split"><label for="card-cvc">Security code</label><input id="card-cvc" name="cvc" type="text" inputmode="numeric" autocomplete="cc-csc" required></p>' +
+        '<p><label for="street">Street</label><input id="street" name="street" type="text" autocomplete="street-address" required></p>' +
+        '<p><label for="city">City</label><input id="city" name="city" type="text" autocomplete="address-level2" required></p>' +
+        '<p class="split"><label for="region">State</label><input id="region" name="region" type="text" autocomplete="address-level1" required></p>' +
+        '<p class="split"><label for="postal">Postal code</label><input id="postal" name="postal" type="text" autocomplete="postal-code" required></p>' +
+        '<p class="actions"><button class="btn btn-red" type="submit">Subscribe</button> <a href="#/plans">Back to plans</a></p></fieldset></form></div>'
+    };
+  }
+
+  function subscriptionView(user) {
+    var sub = user.subscription || { status: "none", invoices: [] };
+    var active = sub.status === "active" && MarqueeStore.planById(sub.plan);
+    var paused = sub.status === "paused" && MarqueeStore.planById(sub.plan);
+    var body = "";
+    if (active) {
+      var plan = MarqueeStore.planById(sub.plan);
+      body = "<p>Current plan: " + esc(plan.name) + ", " + money(plan.price) + " a month.</p>" +
+        "<p>Next billing date: " + esc(formatWhen(sub.nextBilling)) + ".</p>" +
+        "<p>Payment method: card ending " + esc(sub.last4) + ".</p>";
+      var choices = MarqueeStore.plans().map(function (item) {
+        if (item.id === plan.id) return '<button type="button" class="btn btn-light" disabled>' + esc(item.name) + " is current</button>";
+        return '<button type="button" class="btn btn-ghost" data-action="pick-plan" data-plan="' + item.id + '">Change to ' + esc(item.name) + "</button>";
+      }).join(" ");
+      body += "<h2>Change plan</h2><p class=\"actions\">" + choices + "</p>";
+      if (pendingPlan && MarqueeStore.planById(pendingPlan)) {
+        var next = MarqueeStore.planById(pendingPlan);
+        body += '<div class="panel"><p>Switch to ' + esc(next.name) + " for " + money(next.price) + " a month. The card ending " + esc(sub.last4) + " is billed today.</p>" +
+          '<p class="actions"><button type="button" class="btn btn-red" data-action="confirm-plan" data-plan="' + esc(next.id) + '">Confirm change</button> ' +
+          '<button type="button" class="btn btn-ghost" data-action="keep-plan">Keep ' + esc(plan.name) + "</button></p></div>";
+      }
+      body += '<h2>Pause or cancel</h2><p>Pausing holds billing and closes the full catalog until you resume. Canceling ends the plan today. Your reviews, favorites, and billing history stay on this account.</p>';
+      if (confirmingCancel) {
+        body += '<div class="panel"><p>Cancel ' + esc(plan.name) + " today? You can subscribe again whenever you want.</p>" +
+          '<p class="actions"><button type="button" class="btn btn-red" data-action="confirm-cancel">Cancel plan</button> ' +
+          '<button type="button" class="btn btn-ghost" data-action="keep-plan">Keep plan</button></p></div>';
+      } else {
+        body += '<p class="actions"><button type="button" class="btn btn-ghost" data-action="pause-plan">Pause</button> ' +
+          '<button type="button" class="btn btn-ghost" data-action="cancel-ask">Cancel subscription</button></p>';
+      }
+    } else if (paused) {
+      var held = MarqueeStore.planById(sub.plan);
+      body = "<p>" + esc(held.name) + " is paused. Card ending " + esc(sub.last4) + " is still on the account, and the next billing date waits until you resume.</p>" +
+        '<p class="actions"><button type="button" class="btn btn-red" data-action="resume-plan">Resume</button> ' +
+        '<button type="button" class="btn btn-ghost" data-action="cancel-ask">Cancel subscription</button></p>';
+      if (confirmingCancel) {
+        body += '<div class="panel"><p>Cancel ' + esc(held.name) + " today? You can subscribe again whenever you want.</p>" +
+          '<p class="actions"><button type="button" class="btn btn-red" data-action="confirm-cancel">Cancel plan</button> ' +
+          '<button type="button" class="btn btn-ghost" data-action="keep-plan">Keep plan</button></p></div>';
+      }
+    } else {
+      body = "<p>You do not have an active plan. Subscribe when you want the full catalog.</p>" +
+        '<p class="actions"><a class="btn btn-red" href="#/plans">See plans</a></p>';
+    }
+    return {
+      title: "Subscription",
+      html: '<div class="sheet plain"><p class="kicker">' + esc(user.name) + '</p><h1 tabindex="-1">Subscription</h1>' + body +
+        '<p class="actions"><a href="#/billing">Billing history</a> <a href="#/profile">Profile</a></p></div>'
+    };
+  }
+
+  function billingView(user, invoiceId) {
+    var sub = user.subscription || { invoices: [] };
+    var invoices = sub.invoices || [];
+    if (invoiceId) {
+      var invoice = null;
+      invoices.forEach(function (item) { if (item.id === invoiceId) invoice = item; });
+      if (!invoice) return missingView();
+      return {
+        title: "Invoice",
+        html: '<div class="sheet narrow"><p class="kicker"><a href="#/billing">Billing</a></p><h1 tabindex="-1">Invoice</h1>' +
+          '<article class="receipt"><p>' + esc(formatWhen(invoice.at)) + "</p><h2>" + esc(invoice.plan) + "</h2>" +
+          "<p>" + money(invoice.amount) + "</p><p>Status: " + esc(invoice.status) + "</p>" +
+          "<p>Card ending " + esc(invoice.last4) + "</p><p>Billed to " + esc(sub.cardName || user.name) + "</p></article>" +
+          '<p class="actions"><button type="button" class="btn btn-ghost" data-action="print-invoice">Print</button> <a href="#/billing">All invoices</a></p></div>'
+      };
+    }
+    var rows = invoices.length ? invoices.map(function (invoice) {
+      return "<tr><td><a href=\"#/billing/" + esc(invoice.id) + "\">" + esc(formatWhen(invoice.at)) + "</a></td><td>" + esc(invoice.plan) + "</td><td>" + money(invoice.amount) + "</td><td>" + esc(invoice.status) + "</td></tr>";
+    }).join("") : "";
+    var table = invoices.length
+      ? '<div class="invoice-scroll"><table class="invoices"><thead><tr><th>Date</th><th>Plan</th><th>Amount</th><th>Status</th></tr></thead><tbody>' + rows + "</tbody></table></div>"
+      : '<p class="empty">You do not have any invoices yet. A plan adds them here.</p>';
+    return {
+      title: "Billing",
+      html: '<div class="sheet plain"><p class="kicker">' + esc(user.name) + '</p><h1 tabindex="-1">Billing</h1>' +
+        "<p class=\"lede\">Receipts for this account stay in this browser.</p>" + table +
+        '<p class="actions"><a href="#/subscription">Subscription</a> <a href="#/plans">Plans</a></p></div>'
     };
   }
 
@@ -382,6 +578,10 @@
     if (head === "reviews" || head === "notes") return reviewsView(user);
     if (head === "saved") return savedView(user);
     if (head === "profile") return profileView(user);
+    if (head === "plans") return plansView(user);
+    if (head === "subscribe") return subscribeView(user, parts[1]);
+    if (head === "subscription") return subscriptionView(user);
+    if (head === "billing") return billingView(user, parts[1]);
     if (head === "login") return loginView(user);
     if (head === "reset") return resetView();
     return missingView();
@@ -398,7 +598,12 @@
     var head = parts[0] || "movies";
     var user = MarqueeStore.current();
     rendering = true;
-    if (!user && (head === "notes" || head === "reviews" || head === "saved" || head === "profile")) {
+    if (head !== "subscription") {
+      confirmingCancel = false;
+      pendingPlan = "";
+    }
+    if (!user && (head === "notes" || head === "reviews" || head === "saved" || head === "profile" || head === "subscribe" || head === "subscription" || head === "billing")) {
+      returnHash = "#/" + parts.filter(Boolean).join("/");
       rendering = false;
       navigate("#/login");
       return;
@@ -490,11 +695,70 @@
       return;
     }
     if (action === "reset-demo") {
-      if (!window.confirm("Reset the sample movies, reviews, and favorites saved in this browser?")) return;
+      if (!window.confirm("Reset movies, reviews, favorites, and the plan saved in this browser?")) return;
       MarqueeStore.reset();
       shelfFilter = { q: "", genre: "all" };
       MarqueeStore.setFlash("Demo movies restored.");
       navigate("#/");
+      return;
+    }
+    if (action === "pick-plan") {
+      pendingPlan = btn.dataset.plan || "";
+      confirmingCancel = false;
+      lastKey = null;
+      render();
+      return;
+    }
+    if (action === "keep-plan") {
+      pendingPlan = "";
+      confirmingCancel = false;
+      lastKey = null;
+      render();
+      return;
+    }
+    if (action === "confirm-plan") {
+      var member = MarqueeStore.current();
+      if (!member) { navigate("#/login"); return; }
+      var changed = MarqueeStore.changePlan(member.id, btn.dataset.plan);
+      pendingPlan = "";
+      if (!changed.ok) { pageError = changed.error; lastKey = null; render(); return; }
+      succeed("You are now on " + changed.plan.name + ".");
+      return;
+    }
+    if (action === "cancel-ask") {
+      confirmingCancel = true;
+      pendingPlan = "";
+      lastKey = null;
+      render();
+      return;
+    }
+    if (action === "confirm-cancel") {
+      var cancelling = MarqueeStore.current();
+      if (!cancelling) { navigate("#/login"); return; }
+      var cancelled = MarqueeStore.cancelPlan(cancelling.id);
+      confirmingCancel = false;
+      if (!cancelled.ok) { pageError = cancelled.error; lastKey = null; render(); return; }
+      succeed("Your plan has ended. You can subscribe again whenever you want.");
+      return;
+    }
+    if (action === "pause-plan") {
+      var pausing = MarqueeStore.current();
+      if (!pausing) { navigate("#/login"); return; }
+      var paused = MarqueeStore.pausePlan(pausing.id);
+      if (!paused.ok) { pageError = paused.error; lastKey = null; render(); return; }
+      succeed("Billing is paused. The full catalog opens again when you resume.");
+      return;
+    }
+    if (action === "resume-plan") {
+      var resuming = MarqueeStore.current();
+      if (!resuming) { navigate("#/login"); return; }
+      var resumed = MarqueeStore.resumePlan(resuming.id);
+      if (!resumed.ok) { pageError = resumed.error; lastKey = null; render(); return; }
+      succeed("Your plan is active again.");
+      return;
+    }
+    if (action === "print-invoice") {
+      window.print();
       return;
     }
     if (action === "fill-login") {
@@ -538,6 +802,24 @@
       });
       if (!result.ok) { pageError = result.error; render(); return; }
       succeed(result.updated ? "Review updated." : "Review saved in this browser.");
+      return;
+    }
+    if (action === "subscribe") {
+      var subscriber = MarqueeStore.current();
+      if (!subscriber) { navigate("#/login"); return; }
+      result = MarqueeStore.subscribe(subscriber.id, form.dataset.plan, {
+        name: val(form, "name"),
+        card: val(form, "card"),
+        expiry: val(form, "expiry"),
+        cvc: val(form, "cvc"),
+        street: val(form, "street"),
+        city: val(form, "city"),
+        region: val(form, "region"),
+        postal: val(form, "postal")
+      });
+      if (!result.ok) { pageError = result.error; render(); return; }
+      MarqueeStore.setFlash(result.plan.name + " is active. Your receipt is in billing history.");
+      navigate("#/billing");
     }
   }
 

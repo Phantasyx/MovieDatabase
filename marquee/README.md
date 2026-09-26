@@ -2,7 +2,9 @@
 
 Marquee is a movie catalog. You browse Movies, save favorites, write reviews, and open a profile after you sign in. Sample reviews are labeled so they are not mistaken for yours. [PhantasyX](https://phantasyx.com).
 
-Sign-in, reviews, favorites, and password changes stay in the browser. Nothing is emailed and nothing is sent to a server.
+Sign-in, reviews, favorites, plans, and password changes stay in the browser. Nothing is emailed, nothing is charged, and nothing is sent to a server.
+
+Plans are Basic, Standard, and Premium. Billing history stays on the signed-in profile. **Reset demo data** clears the plan along with reviews and favorites.
 
 The public address is [https://marquee.phantasyx.com](https://marquee.phantasyx.com).
 

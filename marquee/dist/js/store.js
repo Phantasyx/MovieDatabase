@@ -2,6 +2,11 @@
 (function () {
   var KEY = "marquee-demo-v1";
   var SESSION = "marquee-demo-session";
+  var PLANS = {
+    basic: { id: "basic", name: "Basic", price: 8.99, screens: "1 screen", quality: "SD" },
+    standard: { id: "standard", name: "Standard", price: 15.49, screens: "2 screens", quality: "HD" },
+    premium: { id: "premium", name: "Premium", price: 22.99, screens: "4 screens", quality: "Ultra HD" }
+  };
   var state = null;
   var sessionUserId = null;
   var memory = null;
@@ -56,6 +61,18 @@
     } else {
       state = saved;
     }
+    var repaired = false;
+    state.users.forEach(function (user) {
+      if (!user.subscription || typeof user.subscription !== "object") {
+        user.subscription = { plan: null, status: "none", nextBilling: null, last4: null, cardName: null, invoices: [] };
+        repaired = true;
+      }
+      if (!Array.isArray(user.subscription.invoices)) {
+        user.subscription.invoices = [];
+        repaired = true;
+      }
+    });
+    if (repaired) persist();
     try {
       sessionUserId = sessionStorage.getItem(SESSION);
     } catch (e) {
@@ -187,6 +204,138 @@
     return { ok: true };
   }
 
+  function planList() {
+    return [PLANS.basic, PLANS.standard, PLANS.premium];
+  }
+
+  function planById(id) {
+    return PLANS[id] || null;
+  }
+
+  function blankSub() {
+    return { plan: null, status: "none", nextBilling: null, last4: null, cardName: null, invoices: [] };
+  }
+
+  function two(n) {
+    return (n < 10 ? "0" : "") + n;
+  }
+
+  function dayStamp(offset) {
+    var date = new Date();
+    date.setDate(date.getDate() + offset);
+    return date.getFullYear() + "-" + two(date.getMonth() + 1) + "-" + two(date.getDate());
+  }
+
+  function addInvoice(sub, plan, last4, offsetDays) {
+    sub.invoices.unshift({
+      id: nid("inv"),
+      at: dayStamp(offsetDays),
+      plan: plan.name,
+      planId: plan.id,
+      amount: plan.price,
+      status: "Paid",
+      last4: last4
+    });
+  }
+
+  function readBilling(input) {
+    var name = String(input.name || "").trim();
+    var card = String(input.card || "").replace(/\D/g, "");
+    var expiry = String(input.expiry || "").trim();
+    var cvc = String(input.cvc || "").trim();
+    var street = String(input.street || "").trim();
+    var city = String(input.city || "").trim();
+    var region = String(input.region || "").trim();
+    var postal = String(input.postal || "").trim();
+    if (name.length < 2) return { ok: false, error: "Enter the name on the card." };
+    if (card.length < 13 || card.length > 19) return { ok: false, error: "Enter the card number as digits." };
+    var match = /^(\d{2})\s*\/\s*(\d{2})$/.exec(expiry);
+    if (!match) return { ok: false, error: "Enter the expiry as MM/YY." };
+    var month = Number(match[1]);
+    var year = 2000 + Number(match[2]);
+    if (month < 1 || month > 12) return { ok: false, error: "Enter a month from 01 to 12." };
+    if (new Date(year, month, 1) <= new Date()) return { ok: false, error: "That card is expired." };
+    if (!/^\d{3,4}$/.test(cvc)) return { ok: false, error: "Enter the 3 or 4 digit security code." };
+    if (!street || !city || !region || !postal) return { ok: false, error: "Enter the billing address." };
+    return { ok: true, name: name, last4: card.slice(-4) };
+  }
+
+  function hasCatalog(user) {
+    var sub = user && user.subscription;
+    return !!(sub && sub.status === "active" && sub.plan && planById(sub.plan));
+  }
+
+  function subscribe(userId, planId, input) {
+    var user = state.users.find(function (u) { return u.id === userId; });
+    var plan = planById(planId);
+    if (!user) return { ok: false, error: "Sign in before choosing a plan." };
+    if (!plan) return { ok: false, error: "Choose Basic, Standard, or Premium." };
+    var billing = readBilling(input || {});
+    if (!billing.ok) return billing;
+    if (!user.subscription) user.subscription = blankSub();
+    var sub = user.subscription;
+    var first = !sub.invoices.length;
+    sub.plan = plan.id;
+    sub.status = "active";
+    sub.nextBilling = dayStamp(30);
+    sub.last4 = billing.last4;
+    sub.cardName = billing.name;
+    if (first) {
+      addInvoice(sub, plan, billing.last4, -60);
+      addInvoice(sub, plan, billing.last4, -30);
+    }
+    addInvoice(sub, plan, billing.last4, 0);
+    persist();
+    return { ok: true, plan: plan };
+  }
+
+  function changePlan(userId, planId) {
+    var user = state.users.find(function (u) { return u.id === userId; });
+    var plan = planById(planId);
+    if (!user || !user.subscription || user.subscription.status !== "active" || !user.subscription.last4) {
+      return { ok: false, error: "Subscribe before changing a plan." };
+    }
+    if (!plan) return { ok: false, error: "Choose Basic, Standard, or Premium." };
+    if (user.subscription.plan === plan.id) return { ok: false, error: "You are already on that plan." };
+    user.subscription.plan = plan.id;
+    user.subscription.nextBilling = dayStamp(30);
+    addInvoice(user.subscription, plan, user.subscription.last4, 0);
+    persist();
+    return { ok: true, plan: plan };
+  }
+
+  function pausePlan(userId) {
+    var user = state.users.find(function (u) { return u.id === userId; });
+    if (!user || !user.subscription || user.subscription.status !== "active") {
+      return { ok: false, error: "There is no active plan to pause." };
+    }
+    user.subscription.status = "paused";
+    persist();
+    return { ok: true };
+  }
+
+  function resumePlan(userId) {
+    var user = state.users.find(function (u) { return u.id === userId; });
+    if (!user || !user.subscription || user.subscription.status !== "paused" || !user.subscription.plan) {
+      return { ok: false, error: "There is no paused plan to resume." };
+    }
+    user.subscription.status = "active";
+    user.subscription.nextBilling = dayStamp(30);
+    persist();
+    return { ok: true };
+  }
+
+  function cancelPlan(userId) {
+    var user = state.users.find(function (u) { return u.id === userId; });
+    if (!user || !user.subscription || (user.subscription.status !== "active" && user.subscription.status !== "paused")) {
+      return { ok: false, error: "There is no plan to cancel." };
+    }
+    user.subscription.status = "cancelled";
+    user.subscription.nextBilling = null;
+    persist();
+    return { ok: true };
+  }
+
   function setPassword(email, password, confirm) {
     email = String(email || "").trim().toLowerCase();
     password = String(password || "").trim();
@@ -220,6 +369,14 @@
     isFavorite: isFavorite,
     favoritesFor: favoritesFor,
     toggleFavorite: toggleFavorite,
-    setPreference: setPreference
+    setPreference: setPreference,
+    plans: planList,
+    planById: planById,
+    hasCatalog: hasCatalog,
+    subscribe: subscribe,
+    changePlan: changePlan,
+    pausePlan: pausePlan,
+    resumePlan: resumePlan,
+    cancelPlan: cancelPlan
   };
 })();

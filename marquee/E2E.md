@@ -17,7 +17,10 @@ Checked on 26 Sep 2026 against `marquee/dist/` served at `http://127.0.0.1:8080/
 | Save on a title shows "Saved to your favorites." and the button reads Saved. Saved favorites lists that movie. Removing it shows "Removed from your favorites." | Passed |
 | Saving a review on Paper Airfield shows "Review saved in this browser." The review is Mina Cole's and is not labeled Sample review. Saving again updates that one review | Passed |
 | Your reviews lists the Paper Airfield review. `#/notes` still opens Your reviews | Passed |
-| Profile shows Mina Cole, mina@marquee.demo, the initials MC, and a Demo member badge. The reminder switch stays on after leaving the page | Passed |
+| Profile shows Mina Cole, mina@marquee.demo, the initials MC, and a Member badge. The reminder switch stays on after leaving the page | Passed |
+| Glass Weather is included with a plan until someone subscribes. Plans lists Basic, Standard, and Premium | Passed |
+| A short card number is rejected. 4242 4242 4242 4242 with an expiry, security code, and billing address starts Standard, stores only the last 4, and lists paid invoices | Passed |
+| The plan can change to Premium, pause, resume, cancel, and be purchased again. Sam does not inherit Mina's plan. Reset demo data clears the plan and the invoices | Passed |
 | Log out hides Your reviews and leaves the review readable, with a sign-in prompt | Passed |
 | Sam Ortiz can read a title and cannot open the review form. His reviews page starts empty. A favorite he saves does not appear on Mina's saved list | Passed |
 | A short password and a mismatched password are rejected. A matching password of 8 or more characters updates in the browser | Passed |
