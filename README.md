@@ -12,7 +12,7 @@ The PHP tree (`*.php`, `lib/`, `post/`, `tests/`, `vendor/`) is the archived cou
 python3 -m http.server 8080 --directory marquee
 ```
 
-Open [http://localhost:8080/](http://localhost:8080/). There is no build step. Output to publish is the `marquee/` folder.
+Open [http://localhost:8080/](http://localhost:8080/). `sh marquee/build.sh` writes the publishable copy to `marquee/dist/`.
 
 Demo accounts, also listed on the sign-in screen:
 
@@ -21,29 +21,38 @@ Demo accounts, also listed on the sign-in screen:
 | mina@marquee.demo | demo-reviewer |
 | sam@marquee.demo | demo-reader |
 
-## Copy to phantasyx.com
+## Build output
 
-Copy `marquee/` and publish it as a static directory (site root, or a path such as `/examples/marquee/`).
+`sh marquee/build.sh` copies the shelf into `marquee/dist/`. That directory is the build output:
 
-Safe to copy:
+- `marquee/dist/index.html`
+- `marquee/dist/css/marquee.css`
+- `marquee/dist/js/data.js`
+- `marquee/dist/js/store.js`
+- `marquee/dist/js/app.js`
+- `marquee/dist/favicon.svg`
+- `marquee/dist/robots.txt`
+- `marquee/dist/_headers`
 
-- `marquee/index.html`
-- `marquee/css/`
-- `marquee/js/`
-- `marquee/favicon.svg`
-- `marquee/robots.txt`
-- `marquee/_headers`
-- `marquee/.nojekyll`
-- `marquee/wrangler.jsonc` if you deploy with Workers
-- `marquee/.github/` only when that folder is its own repository
-
-Do not publish the PHP archive as the marketing example.
+Browser notes are in `marquee/E2E.md`. Do not publish the PHP archive as the marketing example.
 
 ## Hosting
 
-- **This repository, GitHub Pages:** `.github/workflows/pages.yml` publishes `marquee/` after Pages is set to GitHub Actions. This environment cannot turn that setting on, so there is no live URL until then. The site will be `https://<user>.github.io/<repository>/`.
+The public host is **https://marquee.phantasyx.com**.
+
+`marquee/wrangler.jsonc` is an assets-only Worker with a custom domain on that hostname. From `marquee/`, on the Cloudflare account that holds the `phantasyx.com` zone:
+
+```bash
+npx wrangler@4 whoami
+npx wrangler@4 deploy
+```
+
+Deploy creates the DNS record and certificate. The hostname must not already have a CNAME. Full steps, including a different name such as `movies.phantasyx.com`, are in `marquee/README.md`.
+
+A path such as `phantasyx.com/examples/marquee/` can serve the same files. Use it only when a subdomain cannot be added.
+
+- **This repository, GitHub Pages:** `.github/workflows/pages.yml` publishes `marquee/` after Pages is set to GitHub Actions. That is a preview path. The phantasyx.com host is the subdomain above.
 - **Its own repository:** see `marquee/README.md`. Creating `Phantasyx/marquee` needs a token that can create repositories. This checkout cannot.
-- **Cloudflare Workers:** from `marquee/`, run `npx wrangler@4 deploy`. The config serves static assets only.
 
 ## Archived PHP app
 
