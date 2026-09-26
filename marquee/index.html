@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Marquee is a movie catalog. Browse movies, save favorites, write reviews, and choose a plan.">
+  <meta name="theme-color" content="#141414">
+  <title>Marquee</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preload" as="image" href="images/hero.jpg" fetchpriority="high">
+  <link rel="stylesheet" href="css/marquee.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <div id="app"></div>
+  <noscript>
+    <main class="wrap">
+      <h1>Marquee</h1>
+      <p>Marquee keeps this catalog in your browser and needs JavaScript to run.</p>
+    </main>
+  </noscript>
+  <script src="js/data.js" defer></script>
+  <script src="js/store.js" defer></script>
+  <script src="js/app.js" defer></script>
+</body>
+</html>

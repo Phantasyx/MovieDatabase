@@ -19,7 +19,7 @@ public function test_construct() {
         'phone' => '123-456-7890',
         'address' => 'Some Address',
         'notes' => 'Some Notes',
-        'password' => '12345678',
+        'password' => '',
         'joined' => '2015-01-15 23:50:26',
         'role' => 'S'
     );

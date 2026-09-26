@@ -46,10 +46,13 @@ class Site
             return $this->pdo;
         }
 
+        if (!$this->dbHost || !$this->dbUser || $this->dbPassword === null || $this->dbPassword === '') {
+            die("Database is not configured");
+        }
+
         try {
             $this->pdo = new \PDO($this->dbHost, $this->dbUser, $this->dbPassword);
         } catch(\PDOException $e) {
-            // If we can't connect we die!
             die("Unable to select database");
         }
 

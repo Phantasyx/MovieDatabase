@@ -52,7 +52,7 @@ SQL;
     public function get($id) {
         $sql =<<<SQL
 SELECT * from $this->tableName
-where id=$id
+where id=?
 SQL;
         $pdo = $this->pdo();
         $statement = $pdo->prepare($sql);
@@ -157,8 +157,8 @@ SQL;
         $validators = new Validators($this->site);
         $validator = $validators->newValidator($id);
 
-        $link = "http://webdev.cse.msu.edu"  . $this->site->getRoot() .
-            '/password-validate.php?v=' . $validator;
+        $root = rtrim($this->site->getRoot(), '/');
+        $link = $root . '/password-validate.php?v=' . rawurlencode($validator);
         $from = $this->site->getEmail();
         $name = $user->getName();
         $subject = "Confirm your email";
@@ -189,7 +189,6 @@ SQL;
     }
 
     public function delete($id) {
-    var_dump($id);
     $sql =<<<SQL
 DELETE from $this->tableName
 where id=?

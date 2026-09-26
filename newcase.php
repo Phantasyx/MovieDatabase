@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>Felis New Case</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="robots" content="noindex, nofollow">
 	<link rel="stylesheet" href="lib/css/felis.css">
 </head>
 
