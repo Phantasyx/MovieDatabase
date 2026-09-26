@@ -50,7 +50,7 @@
     } catch (e) {
       saved = null;
     }
-    if (!saved || saved.version !== 2 || !Array.isArray(saved.users) || !Array.isArray(saved.films) || !Array.isArray(saved.reviews)) {
+    if (!saved || saved.version !== 3 || !Array.isArray(saved.users) || !Array.isArray(saved.films) || !Array.isArray(saved.reviews)) {
       state = window.MarqueeData.seed();
       persist();
     } else {
@@ -123,15 +123,15 @@
   function saveReview(userId, filmId, input) {
     var author = state.users.find(function (u) { return u.id === userId; });
     if (!author || author.role !== "reviewer") {
-      return { ok: false, error: "This demo account can read notes, not write them." };
+      return { ok: false, error: "This demo account can read reviews, not write them." };
     }
-    if (!filmById(filmId)) return { ok: false, error: "That title is not on the shelf." };
+    if (!filmById(filmId)) return { ok: false, error: "That movie is not in the catalog." };
     var rating = Number(input.rating);
     var title = String(input.title || "").trim();
     var body = String(input.body || "").trim();
     if (![1, 2, 3, 4, 5].includes(rating)) return { ok: false, error: "Choose a rating from 1 to 5." };
-    if (!body) return { ok: false, error: "Write the note before saving." };
-    if (title.length > 80 || body.length > 1200) return { ok: false, error: "Keep the note shorter for this demo." };
+    if (!body) return { ok: false, error: "Write the review before saving." };
+    if (title.length > 80 || body.length > 1200) return { ok: false, error: "Keep the review shorter for this demo." };
     var existing = userReview(userId, filmId);
     if (existing) {
       existing.rating = rating;
@@ -152,6 +152,39 @@
     }
     persist();
     return { ok: true, updated: !!existing };
+  }
+
+  function isFavorite(userId, filmId) {
+    var user = state.users.find(function (u) { return u.id === userId; });
+    return !!(user && Array.isArray(user.favorites) && user.favorites.indexOf(filmId) !== -1);
+  }
+
+  function favoritesFor(userId) {
+    var user = state.users.find(function (u) { return u.id === userId; });
+    var ids = user && Array.isArray(user.favorites) ? user.favorites : [];
+    return ids.map(function (id) { return filmById(id); }).filter(Boolean);
+  }
+
+  function toggleFavorite(userId, filmId) {
+    var user = state.users.find(function (u) { return u.id === userId; });
+    if (!user) return { ok: false, error: "Sign in to save a movie." };
+    if (!filmById(filmId)) return { ok: false, error: "That movie is not in the catalog." };
+    if (!Array.isArray(user.favorites)) user.favorites = [];
+    var index = user.favorites.indexOf(filmId);
+    if (index === -1) user.favorites.push(filmId);
+    else user.favorites.splice(index, 1);
+    persist();
+    return { ok: true, saved: index === -1 };
+  }
+
+  function setPreference(userId, key, value) {
+    var user = state.users.find(function (u) { return u.id === userId; });
+    if (!user) return { ok: false };
+    if (key !== "reminders" && key !== "quiet") return { ok: false };
+    if (!user.preferences) user.preferences = { reminders: false, quiet: true };
+    user.preferences[key] = !!value;
+    persist();
+    return { ok: true };
   }
 
   function setPassword(email, password, confirm) {
@@ -183,6 +216,10 @@
     peekFlash: peekFlash,
     takeFlash: takeFlash,
     saveReview: saveReview,
-    setPassword: setPassword
+    setPassword: setPassword,
+    isFavorite: isFavorite,
+    favoritesFor: favoritesFor,
+    toggleFavorite: toggleFavorite,
+    setPreference: setPreference
   };
 })();

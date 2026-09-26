@@ -1,6 +1,6 @@
 # Marquee
 
-Marquee is the public demo in this repository: a dark film shelf with poster rows, demo sign-in, and notes that stay in the browser. It is an early PHP login project rebuilt as a static site for [PhantasyX](https://phantasyx.com). Photographs are from Unsplash.
+Marquee is the public demo in this repository: a dark movie catalog with poster rows, saved favorites, reviews, a demo profile, and sign-in that stays in the browser. It is an early PHP login project rebuilt as a static site for [PhantasyX](https://phantasyx.com). Photographs are from Unsplash.
 
 The films are sample titles. Sample reviews are labeled as samples. This is not client work, and it does not use production accounts.
 
@@ -18,12 +18,12 @@ Demo accounts, also listed on the sign-in screen:
 
 | Email | Password | Can do |
 | --- | --- | --- |
-| mina@marquee.demo | demo-reviewer | Leave notes |
-| sam@marquee.demo | demo-reader | Read the shelf |
+| mina@marquee.demo | demo-reviewer | Write reviews and save favorites |
+| sam@marquee.demo | demo-reader | Read reviews and save favorites |
 
 ## Build output
 
-`sh marquee/build.sh` copies the shelf into `marquee/dist/`. That directory is the build output:
+`sh marquee/build.sh` copies the catalog into `marquee/dist/`. That directory is the build output:
 
 - `marquee/dist/index.html`
 - `marquee/dist/css/marquee.css`
@@ -35,7 +35,7 @@ Demo accounts, also listed on the sign-in screen:
 - `marquee/dist/_headers`
 - `marquee/dist/images/`
 
-Browser notes are in `marquee/E2E.md`. Do not publish the PHP archive as the marketing example.
+What was checked in the browser is in `marquee/E2E.md`. Do not publish the PHP archive as the marketing example.
 
 ## Hosting
 

@@ -1,8 +1,8 @@
 # Marquee
 
-Marquee is a film shelf you browse like a streaming home page. It is an early PHP login project rebuilt as a portfolio demo for [PhantasyX](https://phantasyx.com). The titles are invented. Sample notes are labeled so they are not mistaken for yours. This is not client work.
+Marquee is a movie catalog you browse like a streaming home page. It is an early PHP login project rebuilt as a portfolio demo for [PhantasyX](https://phantasyx.com). The titles are invented. Sample reviews are labeled so they are not mistaken for yours. This is not client work.
 
-Sign-in, notes, and password changes stay in the browser. Nothing is emailed and nothing is sent to a server.
+Sign-in, reviews, favorites, and password changes stay in the browser. Nothing is emailed and nothing is sent to a server.
 
 The public address is [https://marquee.phantasyx.com](https://marquee.phantasyx.com).
 
@@ -15,20 +15,20 @@ sh build.sh
 python3 -m http.server 8080 --directory dist
 ```
 
-Open [http://localhost:8080/](http://localhost:8080/). `dist/` is the same shelf Wrangler publishes.
+Open [http://localhost:8080/](http://localhost:8080/). `dist/` is the same build Wrangler publishes.
 
 ### Demo accounts
 
 | Name | Email | Password | What the account can do |
 | --- | --- | --- | --- |
-| Mina Cole | mina@marquee.demo | demo-reviewer | Leave notes on titles |
-| Sam Ortiz | sam@marquee.demo | demo-reader | Read the shelf |
+| Mina Cole | mina@marquee.demo | demo-reviewer | Write reviews and save favorites |
+| Sam Ortiz | sam@marquee.demo | demo-reader | Read reviews and save favorites |
 
-Sample notes already on a title are labeled **Sample note**. They are not accounts. A password change or a note you write is stored only in that browser. **Reset demo data** restores the sample shelf.
+Sample reviews already on a title are labeled **Sample review**. They are not accounts. A password change, a review you write, and a movie you save stay in that browser, on that demo account. **Reset demo data** restores the sample movies and clears those changes.
 
 ## Photographs
 
-Every title uses a photograph from [Unsplash](https://unsplash.com). The [Unsplash License](https://unsplash.com/license) allows this use and does not require attribution. The shelf still lists a source link for each picture under Photograph credits. The files live in `images/` and are copied into `dist/images/` by the build. They are not generated images.
+Every title uses its own photograph from [Unsplash](https://unsplash.com). The [Unsplash License](https://unsplash.com/license) allows this use and does not require attribution. The catalog still lists a source link for each picture under Photograph credits. The files live in `images/` and are copied into `dist/images/` by the build. They are not generated images.
 
 What was exercised in the browser is written in [E2E.md](E2E.md).
 
@@ -50,11 +50,11 @@ That writes `dist/`:
 - `dist/_headers`
 - `dist/images/`
 
-`wrangler.jsonc` publishes `dist/`. Notes in this folder stay out of the upload.
+`wrangler.jsonc` publishes `dist/`. This README stays out of the upload.
 
 ## Host on marquee.phantasyx.com
 
-The shelf is hash-routed (`#/film/f-tide`), so the hostname root is the right place for it. `wrangler.jsonc` attaches the Worker to `marquee.phantasyx.com` as a Cloudflare custom domain. Deploy creates the DNS record and the certificate. The zone has to be on the same Cloudflare account, and that hostname cannot already have a CNAME.
+The catalog is hash-routed (`#/film/f-tide`), so the hostname root is the right place for it. `wrangler.jsonc` attaches the Worker to `marquee.phantasyx.com` as a Cloudflare custom domain. Deploy creates the DNS record and the certificate. The zone has to be on the same Cloudflare account, and that hostname cannot already have a CNAME.
 
 From this folder, with Wrangler 4, after `sh build.sh`:
 

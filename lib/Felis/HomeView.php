@@ -26,7 +26,7 @@ class HomeView extends View
      */
     protected function headerAdditional() {
         return <<<HTML
-<p>The public demo rebuilt from this early login project is <a href="marquee/">Marquee</a>, a static movie-review shelf. It does not need PHP or a database.</p>
+<p>The public demo rebuilt from this early login project is <a href="marquee/">Marquee</a>, a static movie catalog with reviews and saved favorites. It does not need PHP or a database.</p>
 <p>Welcome to Felis Investigations!</p>
 <p>Domestic, divorce, and carousing investigations conducted without publicity. People and cats shadowed
 	and investigated by expert inspectors. Katnapped kittons located. Missing cats and witnesses located.

@@ -1,32 +1,28 @@
-# End-to-end notes
+# End-to-end checks
 
-Checked on 26 September 2026 against `http://127.0.0.1:8080/`, serving `dist/` after `sh build.sh`. The browser was headless Chrome at 1280px and at 390px. Each run started from a cleared `localStorage` key `marquee-demo-v1` and a cleared session.
+Checked on 26 Sep 2026 against `marquee/dist/` served at `http://127.0.0.1:8080/`. Desktop viewport 1280 by 800. Phone viewport 390 by 800. Storage was cleared before the run.
 
-## Primary flows
-
-| Flow | Result |
+| Check | Result |
 | --- | --- |
-| Shelf opens on the Second Balcony hero and lists all eight titles in poster rows | Passed |
+| Movies opens on the Second Balcony hero and lists 33 titles, each with its own local poster | Passed |
 | Every poster and the hero loaded a local photograph (natural size above 40px) | Passed |
 | Search for `lantern` leaves only The Brass Lantern and hides the hero | Passed |
-| Comedy combined with that search shows an empty shelf. Clearing the search leaves Kitchen Choir | Passed |
-| Kitchen Choir labels June Park's copy **Sample note** | Passed |
-| Paper Airfield starts with no notes and still shows its photograph | Passed |
-| `#/notes` while signed out opens Sign in | Passed |
-| Unknown email shows "Those credentials are not in this demo." | Passed |
-| Signing in as Mina Cole shows "Signed in as Mina Cole." on screen | Passed |
-| Saving a note on Paper Airfield shows "Note saved in this browser." on screen. The note is Mina Cole's and is not labeled Sample note. Saving again updates that one note | Passed |
-| Your notes lists the Paper Airfield note | Passed |
-| Log out returns to the shelf, hides Your notes, and leaves the note readable with a sign-in prompt | Passed |
-| Sam Ortiz can read a title and cannot open the note form. His notes page starts empty | Passed |
-| A password shorter than 8 characters is rejected. Two different new passwords are rejected. A matching password is stored in this browser | Passed |
-| Reset demo data restores eight titles, removes the written note, and restores both seed passwords | Passed |
-| `#/missing` shows "That page is not on the shelf." | Passed |
-| At 1280px and at 390px the page does not scroll sideways. Poster rows scroll inside themselves. The phone menu stays inside the screen and Escape closes it | Passed |
-| The page reported no JavaScript errors | Passed |
+| Comedy combined with that search shows "No movies match that search." Clearing the search leaves the comedy titles, including Kitchen Choir and Bicycle Sunday | Passed |
+| Kitchen Choir labels June Park's copy **Sample review** | Passed |
+| Paper Airfield starts with no reviews and still shows its photograph | Passed |
+| Saving a movie while signed out opens Sign in, with "Sign in to save a movie." | Passed |
+| `#/reviews`, `#/saved`, `#/profile`, and the older `#/notes` path open Sign in while signed out | Passed |
+| A bad password shows "Those credentials are not in this demo." | Passed |
+| Mina Cole can sign in. The header links to her profile. The banner "Signed in as Mina Cole." is on screen | Passed |
+| Save on a title shows "Saved to your favorites." and the button reads Saved. Saved favorites lists that movie. Removing it shows "Removed from your favorites." | Passed |
+| Saving a review on Paper Airfield shows "Review saved in this browser." The review is Mina Cole's and is not labeled Sample review. Saving again updates that one review | Passed |
+| Your reviews lists the Paper Airfield review. `#/notes` still opens Your reviews | Passed |
+| Profile shows Mina Cole, mina@marquee.demo, the initials MC, and a Demo member badge. The reminder switch stays on after leaving the page | Passed |
+| Log out hides Your reviews and leaves the review readable, with a sign-in prompt | Passed |
+| Sam Ortiz can read a title and cannot open the review form. His reviews page starts empty. A favorite he saves does not appear on Mina's saved list | Passed |
+| A short password and a mismatched password are rejected. A matching password of 8 or more characters updates in the browser | Passed |
+| Reset demo data restores 33 titles, removes the written review, signs out, and restores the seed password | Passed |
+| `#/missing` shows "That page is not in the catalog." | Passed |
+| At 1280 and at 390, the page does not scroll sideways. At 390 the menu opens from the left edge to the right edge, a poster row scrolls inside itself, and Escape closes the menu | Passed |
 
-## Not part of this check
-
-- A live deploy of `https://marquee.phantasyx.com`. This environment did not publish the Worker.
-- Email. Password changes stay in the browser.
-- The archived PHP app. It needs a database this demo does not ship.
+No Cloudflare deploy was run.

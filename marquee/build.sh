@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copy the static shelf into dist/. That directory is the publishable build.
+# Copy the static site into dist/. That directory is the publishable build.
 set -eu
 cd "$(dirname "$0")"
 rm -rf dist
