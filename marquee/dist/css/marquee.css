@@ -466,6 +466,24 @@ fieldset.card { margin: 0; padding: 1rem 1rem 0.4rem; }
 .accounts { display: grid; gap: 0.75rem; }
 .account h3 { font-size: 1rem; letter-spacing: 0; }
 .hint, .empty { color: var(--muted); }
+.sample-note {
+  margin: 0 0 0.9rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid rgba(229, 9, 20, 0.65);
+  border-radius: 8px;
+  background: #241416;
+  color: #fff;
+}
+.sample-bill { margin: 0 0 0.4rem; }
+.sample-bill div {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr);
+  gap: 0.35rem 0.75rem;
+  padding: 0.45rem 0;
+  border-top: 1px solid var(--line);
+}
+.sample-bill dt { margin: 0; color: var(--muted); }
+.sample-bill dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
 .cred { font-weight: 700; }
 
 .banner, .alert {
@@ -635,6 +653,7 @@ button:disabled { opacity: 0.65; cursor: default; }
   }
   .hero-copy .actions .btn,
   .title-copy .actions .btn { width: 100%; }
+  .sample-bill div { grid-template-columns: 1fr; gap: 0.1rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

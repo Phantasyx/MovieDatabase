@@ -425,9 +425,22 @@
     return {
       title: "Plans",
       html: '<div class="sheet plans-wrap"><p class="kicker">Marquee</p><h1 tabindex="-1">Choose a plan</h1>' +
-        '<p class="lede">Open the full catalog on the plan that fits how you watch. You can change or cancel from your profile, and billing stays on this account.</p>' +
+        '<p class="lede">Open the full catalog on the plan that fits how you watch. You can change or cancel from your profile. Checkout uses sample billing, and nothing is charged.</p>' +
         '<div class="plan-grid">' + cards + "</div></div>"
     };
+  }
+
+  function sampleCardBlock() {
+    var sample = MarqueeStore.sampleBilling();
+    var address = sample.street + ", " + sample.city + ", " + sample.region + " " + sample.postal;
+    return '<p class="sample-note">This is sample billing for the demo. Nothing is charged. The name, card number, expiry, security code, and billing address cannot be edited.</p>' +
+      '<dl class="sample-bill">' +
+      "<div><dt>Name</dt><dd>" + esc(sample.name) + "</dd></div>" +
+      "<div><dt>Card number</dt><dd>" + esc(sample.number) + "</dd></div>" +
+      "<div><dt>Expiry</dt><dd>" + esc(sample.expiry) + "</dd></div>" +
+      "<div><dt>Security code</dt><dd>" + esc(sample.cvc) + "</dd></div>" +
+      "<div><dt>Billing address</dt><dd>" + esc(address) + "</dd></div>" +
+      "</dl>";
   }
 
   function subscribeView(user, planId) {
@@ -436,17 +449,10 @@
     return {
       title: "Subscribe",
       html: '<div class="sheet narrow"><p class="kicker"><a href="#/plans">' + esc(plan.name) + '</a></p><h1 tabindex="-1">Subscribe to ' + esc(plan.name) + "</h1>" +
-        "<p class=\"lede\">" + money(plan.price) + " a month, billed to the card you enter here. You can change or cancel from your profile.</p>" +
-        '<form data-action="subscribe" data-plan="' + esc(plan.id) + '"><fieldset class="card"><legend>Billing</legend>' +
-        '<p><label for="card-name">Name on card</label><input id="card-name" name="name" type="text" autocomplete="cc-name" required></p>' +
-        '<p><label for="card-number">Card number</label><input id="card-number" name="card" type="text" inputmode="numeric" autocomplete="cc-number" required></p>' +
-        '<p class="split"><label for="card-expiry">Expiry</label><input id="card-expiry" name="expiry" type="text" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/YY" required></p>' +
-        '<p class="split"><label for="card-cvc">Security code</label><input id="card-cvc" name="cvc" type="text" inputmode="numeric" autocomplete="cc-csc" required></p>' +
-        '<p><label for="street">Street</label><input id="street" name="street" type="text" autocomplete="street-address" required></p>' +
-        '<p><label for="city">City</label><input id="city" name="city" type="text" autocomplete="address-level2" required></p>' +
-        '<p class="split"><label for="region">State</label><input id="region" name="region" type="text" autocomplete="address-level1" required></p>' +
-        '<p class="split"><label for="postal">Postal code</label><input id="postal" name="postal" type="text" autocomplete="postal-code" required></p>' +
-        '<p class="actions"><button class="btn btn-red" type="submit">Subscribe</button> <a href="#/plans">Back to plans</a></p></fieldset></form></div>'
+        "<p class=\"lede\">" + money(plan.price) + " a month. This is sample billing for the demo. Nothing is charged.</p>" +
+        '<form data-action="subscribe" data-plan="' + esc(plan.id) + '"><fieldset class="card"><legend>Sample billing</legend>' +
+        sampleCardBlock() +
+        '<p class="actions"><button class="btn btn-red" type="submit">Use sample card</button> <a class="btn btn-ghost" href="#/plans">Back to plans</a></p></fieldset></form></div>'
     };
   }
 
@@ -459,7 +465,7 @@
       var plan = MarqueeStore.planById(sub.plan);
       body = "<p>Current plan: " + esc(plan.name) + ", " + money(plan.price) + " a month.</p>" +
         "<p>Next billing date: " + esc(formatWhen(sub.nextBilling)) + ".</p>" +
-        "<p>Payment method: card ending " + esc(sub.last4) + ".</p>";
+        "<p>Payment method: sample card ending " + esc(sub.last4) + ". Nothing is charged.</p>";
       var choices = MarqueeStore.plans().map(function (item) {
         if (item.id === plan.id) return '<button type="button" class="btn btn-light" disabled>' + esc(item.name) + " is current</button>";
         return '<button type="button" class="btn btn-ghost" data-action="pick-plan" data-plan="' + item.id + '">Change to ' + esc(item.name) + "</button>";
@@ -467,7 +473,7 @@
       body += "<h2>Change plan</h2><p class=\"actions\">" + choices + "</p>";
       if (pendingPlan && MarqueeStore.planById(pendingPlan)) {
         var next = MarqueeStore.planById(pendingPlan);
-        body += '<div class="panel"><p>Switch to ' + esc(next.name) + " for " + money(next.price) + " a month. The card ending " + esc(sub.last4) + " is billed today.</p>" +
+        body += '<div class="panel"><p>Switch to ' + esc(next.name) + " for " + money(next.price) + " a month. The sample card stays on the account. Nothing is charged.</p>" +
           '<p class="actions"><button type="button" class="btn btn-red" data-action="confirm-plan" data-plan="' + esc(next.id) + '">Confirm change</button> ' +
           '<button type="button" class="btn btn-ghost" data-action="keep-plan">Keep ' + esc(plan.name) + "</button></p></div>";
       }
@@ -482,7 +488,7 @@
       }
     } else if (paused) {
       var held = MarqueeStore.planById(sub.plan);
-      body = "<p>" + esc(held.name) + " is paused. Card ending " + esc(sub.last4) + " is still on the account, and the next billing date waits until you resume.</p>" +
+      body = "<p>" + esc(held.name) + " is paused. The sample card ending " + esc(sub.last4) + " is still on the account, and the next billing date waits until you resume. Nothing is charged.</p>" +
         '<p class="actions"><button type="button" class="btn btn-red" data-action="resume-plan">Resume</button> ' +
         '<button type="button" class="btn btn-ghost" data-action="cancel-ask">Cancel subscription</button></p>';
       if (confirmingCancel) {
@@ -513,7 +519,7 @@
         html: '<div class="sheet narrow"><p class="kicker"><a href="#/billing">Billing</a></p><h1 tabindex="-1">Invoice</h1>' +
           '<article class="receipt"><p>' + esc(formatWhen(invoice.at)) + "</p><h2>" + esc(invoice.plan) + "</h2>" +
           "<p>" + money(invoice.amount) + "</p><p>Status: " + esc(invoice.status) + "</p>" +
-          "<p>Card ending " + esc(invoice.last4) + "</p><p>Billed to " + esc(sub.cardName || user.name) + "</p></article>" +
+          "<p>Sample card ending " + esc(invoice.last4) + "</p><p>Name on the sample card: " + esc(sub.cardName || "Demo User") + "</p><p>Nothing is charged.</p></article>" +
           '<p class="actions"><button type="button" class="btn btn-ghost" data-action="print-invoice">Print</button> <a href="#/billing">All invoices</a></p></div>'
       };
     }
@@ -526,7 +532,7 @@
     return {
       title: "Billing",
       html: '<div class="sheet plain"><p class="kicker">' + esc(user.name) + '</p><h1 tabindex="-1">Billing</h1>' +
-        "<p class=\"lede\">Receipts for this account stay in this browser.</p>" + table +
+        "<p class=\"lede\">These are sample receipts. Nothing is charged. They stay in this browser.</p>" + table +
         '<p class="actions"><a href="#/subscription">Subscription</a> <a href="#/plans">Plans</a></p></div>'
     };
   }
@@ -808,16 +814,7 @@
     if (action === "subscribe") {
       var subscriber = MarqueeStore.current();
       if (!subscriber) { navigate("#/login"); return; }
-      result = MarqueeStore.subscribe(subscriber.id, form.dataset.plan, {
-        name: val(form, "name"),
-        card: val(form, "card"),
-        expiry: val(form, "expiry"),
-        cvc: val(form, "cvc"),
-        street: val(form, "street"),
-        city: val(form, "city"),
-        region: val(form, "region"),
-        postal: val(form, "postal")
-      });
+      result = MarqueeStore.subscribe(subscriber.id, form.dataset.plan);
       if (!result.ok) { pageError = result.error; render(); return; }
       MarqueeStore.setFlash(result.plan.name + " is active. Your receipt is in billing history.");
       navigate("#/billing");

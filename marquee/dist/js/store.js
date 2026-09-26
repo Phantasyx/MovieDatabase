@@ -238,26 +238,47 @@
     });
   }
 
-  function readBilling(input) {
-    var name = String(input.name || "").trim();
-    var card = String(input.card || "").replace(/\D/g, "");
-    var expiry = String(input.expiry || "").trim();
-    var cvc = String(input.cvc || "").trim();
-    var street = String(input.street || "").trim();
-    var city = String(input.city || "").trim();
-    var region = String(input.region || "").trim();
-    var postal = String(input.postal || "").trim();
-    if (name.length < 2) return { ok: false, error: "Enter the name on the card." };
-    if (card.length < 13 || card.length > 19) return { ok: false, error: "Enter the card number as digits." };
-    var match = /^(\d{2})\s*\/\s*(\d{2})$/.exec(expiry);
-    if (!match) return { ok: false, error: "Enter the expiry as MM/YY." };
-    var month = Number(match[1]);
-    var year = 2000 + Number(match[2]);
-    if (month < 1 || month > 12) return { ok: false, error: "Enter a month from 01 to 12." };
-    if (new Date(year, month, 1) <= new Date()) return { ok: false, error: "That card is expired." };
-    if (!/^\d{3,4}$/.test(cvc)) return { ok: false, error: "Enter the 3 or 4 digit security code." };
-    if (!street || !city || !region || !postal) return { ok: false, error: "Enter the billing address." };
-    return { ok: true, name: name, last4: card.slice(-4) };
+  var SAMPLE_CARD = {
+    name: "Demo User",
+    number: "4242 4242 4242 4242",
+    digits: "4242424242424242",
+    expiry: "12/34",
+    cvc: "123",
+    street: "1 Sample Street",
+    city: "Sample City",
+    region: "CA",
+    postal: "42424",
+    last4: "4242"
+  };
+
+  function sampleBilling() {
+    return {
+      name: SAMPLE_CARD.name,
+      number: SAMPLE_CARD.number,
+      expiry: SAMPLE_CARD.expiry,
+      cvc: SAMPLE_CARD.cvc,
+      street: SAMPLE_CARD.street,
+      city: SAMPLE_CARD.city,
+      region: SAMPLE_CARD.region,
+      postal: SAMPLE_CARD.postal,
+      last4: SAMPLE_CARD.last4
+    };
+  }
+
+  function isSampleBilling(input) {
+    if (!input) return true;
+    function text(value) { return String(value == null ? "" : value).trim(); }
+    var fields = ["name", "card", "expiry", "cvc", "street", "city", "region", "postal"];
+    var provided = fields.some(function (key) { return text(input[key]) !== ""; });
+    if (!provided) return true;
+    return text(input.name) === SAMPLE_CARD.name &&
+      text(input.card).replace(/\D/g, "") === SAMPLE_CARD.digits &&
+      text(input.expiry).replace(/\s/g, "") === SAMPLE_CARD.expiry &&
+      text(input.cvc) === SAMPLE_CARD.cvc &&
+      text(input.street) === SAMPLE_CARD.street &&
+      text(input.city) === SAMPLE_CARD.city &&
+      text(input.region) === SAMPLE_CARD.region &&
+      text(input.postal) === SAMPLE_CARD.postal;
   }
 
   function hasCatalog(user) {
@@ -270,21 +291,20 @@
     var plan = planById(planId);
     if (!user) return { ok: false, error: "Sign in before choosing a plan." };
     if (!plan) return { ok: false, error: "Choose Basic, Standard, or Premium." };
-    var billing = readBilling(input || {});
-    if (!billing.ok) return billing;
+    if (!isSampleBilling(input)) return { ok: false, error: "Only the sample card can be used. Nothing is charged." };
     if (!user.subscription) user.subscription = blankSub();
     var sub = user.subscription;
     var first = !sub.invoices.length;
     sub.plan = plan.id;
     sub.status = "active";
     sub.nextBilling = dayStamp(30);
-    sub.last4 = billing.last4;
-    sub.cardName = billing.name;
+    sub.last4 = SAMPLE_CARD.last4;
+    sub.cardName = SAMPLE_CARD.name;
     if (first) {
-      addInvoice(sub, plan, billing.last4, -60);
-      addInvoice(sub, plan, billing.last4, -30);
+      addInvoice(sub, plan, SAMPLE_CARD.last4, -60);
+      addInvoice(sub, plan, SAMPLE_CARD.last4, -30);
     }
-    addInvoice(sub, plan, billing.last4, 0);
+    addInvoice(sub, plan, SAMPLE_CARD.last4, 0);
     persist();
     return { ok: true, plan: plan };
   }
@@ -373,6 +393,7 @@
     plans: planList,
     planById: planById,
     hasCatalog: hasCatalog,
+    sampleBilling: sampleBilling,
     subscribe: subscribe,
     changePlan: changePlan,
     pausePlan: pausePlan,

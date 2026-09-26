@@ -19,7 +19,7 @@ Checked on 26 Sep 2026 against `marquee/dist/` served at `http://127.0.0.1:8080/
 | Your reviews lists the Paper Airfield review. `#/notes` still opens Your reviews | Passed |
 | Profile shows Mina Cole, mina@marquee.demo, the initials MC, and a Member badge. The reminder switch stays on after leaving the page | Passed |
 | Glass Weather is included with a plan until someone subscribes. Plans lists Basic, Standard, and Premium | Passed |
-| A short card number is rejected. 4242 4242 4242 4242 with an expiry, security code, and billing address starts Standard, stores only the last 4, and lists paid invoices | Passed |
+| Checkout shows the sample card as labels, with no editable card fields. Use sample card starts Standard, stores only the last 4, and lists paid invoices. A different card number is refused | Passed |
 | The plan can change to Premium, pause, resume, cancel, and be purchased again. Sam does not inherit Mina's plan. Reset demo data clears the plan and the invoices | Passed |
 | Log out hides Your reviews and leaves the review readable, with a sign-in prompt | Passed |
 | Sam Ortiz can read a title and cannot open the review form. His reviews page starts empty. A favorite he saves does not appear on Mina's saved list | Passed |
