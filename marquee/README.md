@@ -1,6 +1,6 @@
 # Marquee
 
-Marquee is a movie catalog you browse like a streaming home page. It is an early PHP login project rebuilt as a portfolio demo for [PhantasyX](https://phantasyx.com). The titles are invented. Sample reviews are labeled so they are not mistaken for yours. This is not client work.
+Marquee is a movie catalog. You browse Movies, save favorites, write reviews, and open a profile after you sign in. Sample reviews are labeled so they are not mistaken for yours. [PhantasyX](https://phantasyx.com).
 
 Sign-in, reviews, favorites, and password changes stay in the browser. Nothing is emailed and nothing is sent to a server.
 
@@ -17,14 +17,14 @@ python3 -m http.server 8080 --directory dist
 
 Open [http://localhost:8080/](http://localhost:8080/). `dist/` is the same build Wrangler publishes.
 
-### Demo accounts
+### Accounts
 
 | Name | Email | Password | What the account can do |
 | --- | --- | --- | --- |
 | Mina Cole | mina@marquee.demo | demo-reviewer | Write reviews and save favorites |
 | Sam Ortiz | sam@marquee.demo | demo-reader | Read reviews and save favorites |
 
-Sample reviews already on a title are labeled **Sample review**. They are not accounts. A password change, a review you write, and a movie you save stay in that browser, on that demo account. **Reset demo data** restores the sample movies and clears those changes.
+Sample reviews already on a title are labeled **Sample review**. They are not accounts. A password change, a review you write, and a movie you save stay in that browser, on that account. **Reset demo data** restores the movies and clears those changes.
 
 ## Photographs
 
@@ -83,7 +83,7 @@ cd marquee-site
 rm -rf .git
 git init -b main
 git add .
-git commit -m "Publish the Marquee public demo"
+git commit -m "Publish Marquee"
 gh repo create Phantasyx/marquee --public --source=. --remote=origin --push
 ```
 

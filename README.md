@@ -1,10 +1,10 @@
 # Marquee
 
-Marquee is the public demo in this repository: a dark movie catalog with poster rows, saved favorites, reviews, a demo profile, and sign-in that stays in the browser. It is an early PHP login project rebuilt as a static site for [PhantasyX](https://phantasyx.com). Photographs are from Unsplash.
+Marquee is a movie catalog. You browse Movies, save favorites, write reviews, and open a profile after you sign in. Favorites and reviews stay in the browser. Photographs are from Unsplash. [PhantasyX](https://phantasyx.com).
 
-The films are sample titles. Sample reviews are labeled as samples. This is not client work, and it does not use production accounts.
+Sample reviews on a title are labeled as samples.
 
-The PHP tree (`*.php`, `lib/`, `post/`, `tests/`, `vendor/`) is the archived coursework that this repo started from: a login-and-records desk. Database passwords are not stored in source. That archive is not the portfolio demo.
+The PHP tree (`*.php`, `lib/`, `post/`, `tests/`, `vendor/`) is the archived coursework this repository started from: a login-and-records desk. Database passwords are not stored in source. Marquee does not use that archive.
 
 ## Run Marquee locally
 
@@ -14,7 +14,7 @@ python3 -m http.server 8080 --directory marquee
 
 Open [http://localhost:8080/](http://localhost:8080/). `sh marquee/build.sh` writes the publishable copy to `marquee/dist/`.
 
-Demo accounts, also listed on the sign-in screen:
+Accounts, also listed on the sign-in screen:
 
 | Email | Password | Can do |
 | --- | --- | --- |
@@ -35,7 +35,7 @@ Demo accounts, also listed on the sign-in screen:
 - `marquee/dist/_headers`
 - `marquee/dist/images/`
 
-What was checked in the browser is in `marquee/E2E.md`. Do not publish the PHP archive as the marketing example.
+What was checked in the browser is in `marquee/E2E.md`.
 
 ## Hosting
 

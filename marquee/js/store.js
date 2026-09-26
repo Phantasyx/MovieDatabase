@@ -79,7 +79,7 @@
     password = String(password || "").trim();
     var user = state.users.find(function (u) { return u.email.toLowerCase() === email; });
     if (!user || user.password !== password) {
-      return { ok: false, error: "Those credentials are not in this demo." };
+      return { ok: false, error: "That email and password do not match an account." };
     }
     sessionUserId = user.id;
     persistSession();
@@ -123,7 +123,7 @@
   function saveReview(userId, filmId, input) {
     var author = state.users.find(function (u) { return u.id === userId; });
     if (!author || author.role !== "reviewer") {
-      return { ok: false, error: "This demo account can read reviews, not write them." };
+      return { ok: false, error: "This account can read reviews, not write them." };
     }
     if (!filmById(filmId)) return { ok: false, error: "That movie is not in the catalog." };
     var rating = Number(input.rating);
@@ -131,7 +131,7 @@
     var body = String(input.body || "").trim();
     if (![1, 2, 3, 4, 5].includes(rating)) return { ok: false, error: "Choose a rating from 1 to 5." };
     if (!body) return { ok: false, error: "Write the review before saving." };
-    if (title.length > 80 || body.length > 1200) return { ok: false, error: "Keep the review shorter for this demo." };
+    if (title.length > 80 || body.length > 1200) return { ok: false, error: "Keep the review shorter." };
     var existing = userReview(userId, filmId);
     if (existing) {
       existing.rating = rating;
@@ -192,7 +192,7 @@
     password = String(password || "").trim();
     confirm = String(confirm || "").trim();
     var user = state.users.find(function (u) { return u.email.toLowerCase() === email; });
-    if (!user) return { ok: false, error: "That address is not one of the demo accounts." };
+    if (!user) return { ok: false, error: "That address is not an account here." };
     if (password.length < 8) return { ok: false, error: "Use at least 8 characters." };
     if (password !== confirm) return { ok: false, error: "Those passwords do not match." };
     user.password = password;

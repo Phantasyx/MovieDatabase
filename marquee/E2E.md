@@ -12,7 +12,7 @@ Checked on 26 Sep 2026 against `marquee/dist/` served at `http://127.0.0.1:8080/
 | Paper Airfield starts with no reviews and still shows its photograph | Passed |
 | Saving a movie while signed out opens Sign in, with "Sign in to save a movie." | Passed |
 | `#/reviews`, `#/saved`, `#/profile`, and the older `#/notes` path open Sign in while signed out | Passed |
-| A bad password shows "Those credentials are not in this demo." | Passed |
+| A bad password shows "That email and password do not match an account." | Passed |
 | Mina Cole can sign in. The header links to her profile. The banner "Signed in as Mina Cole." is on screen | Passed |
 | Save on a title shows "Saved to your favorites." and the button reads Saved. Saved favorites lists that movie. Removing it shows "Removed from your favorites." | Passed |
 | Saving a review on Paper Airfield shows "Review saved in this browser." The review is Mina Cole's and is not labeled Sample review. Saving again updates that one review | Passed |

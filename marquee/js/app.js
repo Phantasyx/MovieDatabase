@@ -143,7 +143,7 @@
       '<button class="nav-toggle" type="button" data-action="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>' +
       "</div></header>" +
       '<main id="main">' + notice + body + "</main>" +
-      '<footer class="site-foot"><p>Marquee is a portfolio demo from <a href="https://phantasyx.com">PhantasyX</a>. Browse invented movies, save favorites, and write a review after you sign in. Everything you save stays in this browser.</p>' +
+      '<footer class="site-foot"><p>Marquee is a movie catalog. Browse movies, save favorites, write reviews, and open your profile. Favorites and reviews stay in this browser. <a href="https://phantasyx.com">PhantasyX</a>.</p>' +
       '<p><button type="button" class="text-button" data-action="reset-demo">Reset demo data</button></p>' +
       '<details class="credits"><summary>Photograph credits</summary>' +
       '<p>These photographs are from Unsplash and used under the <a href="https://unsplash.com/license">Unsplash License</a>. That license does not require credit. The links are here so each picture can be traced.</p><ul>' +
@@ -271,7 +271,7 @@
     } else if (user) {
       composer = '<div id="review" class="panel"><p>This account can read reviews. <a href="#/login">Sign in as Mina Cole</a> if you want to write one.</p></div>';
     } else {
-      composer = '<div id="review" class="panel"><p>Sign in when you want to write a review on this title. The sample reviews above were written for the demo. <a href="#/login">Sign in</a></p></div>';
+      composer = '<div id="review" class="panel"><p>Sign in when you want to write a review on this title. Sample reviews stay labeled. <a href="#/login">Sign in</a></p></div>';
     }
     return {
       title: film.title,
@@ -346,13 +346,13 @@
     return {
       title: "Sign in",
       html:
-        '<div class="sheet auth"><div><p class="kicker">Demo access</p><h1 tabindex="-1">Sign in</h1>' + note +
-        '<p class="lede">Use a demo account to write a review or save a movie. These passwords are public, and they only work in this browser.</p>' +
+        '<div class="sheet auth"><div><p class="kicker">Accounts</p><h1 tabindex="-1">Sign in</h1>' + note +
+        '<p class="lede">Sign in to write a review or save a movie. The passwords below only work in this browser.</p>' +
         '<form data-action="login"><fieldset class="card"><legend>Sign in</legend>' +
         '<p><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="username" required></p>' +
         '<p><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required></p>' +
         '<p class="actions"><button class="btn btn-red" type="submit">Sign in</button> <a href="#/reset">New password</a></p></fieldset></form></div>' +
-        '<div><h2>Demo accounts</h2><div class="accounts">' + cards + "</div></div></div>"
+        '<div><h2>Accounts</h2><div class="accounts">' + cards + "</div></div></div>"
     };
   }
 
@@ -361,7 +361,7 @@
       title: "New password",
       html:
         '<div class="sheet narrow"><p class="kicker">Stays in this browser</p><h1 tabindex="-1">Choose a new password</h1>' +
-        '<p class="lede">Marquee does not send email. If you know a demo address, you can set a new password here.</p>' +
+        '<p class="lede">Marquee does not send email. If you know an account address, you can set a new password here.</p>' +
         '<form data-action="reset-password"><fieldset class="card"><legend>Password</legend>' +
         '<p><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="username" required></p>' +
         '<p><label for="password">New password</label><input id="password" name="password" type="password" autocomplete="new-password" required></p>' +

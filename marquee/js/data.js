@@ -1,4 +1,4 @@
-/* Sample movies for the Marquee public demo. These titles are invented. */
+/* Movies, reviews, and accounts for Marquee. */
 (function () {
   var SEED = {
     version: 3,
