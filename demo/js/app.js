@@ -123,7 +123,7 @@
     }
     var logout = user ? '<button type="button" class="nav-link" data-action="logout">Log out</button>' : "";
     var notice = "";
-    if (flash) notice += '<p class="banner" role="status">' + esc(flash) + "</p>";
+    if (flash) notice += '<p class="banner" role="status" tabindex="-1">' + esc(flash) + "</p>";
     if (pageError) notice += '<p class="alert" role="alert" tabindex="-1">' + esc(pageError) + "</p>";
     return (
       '<header class="top"><div class="top-inner">' +
@@ -559,14 +559,15 @@
     var app = document.getElementById("app");
     app.innerHTML = shell(view.html, user, parts);
     document.title = view.title === "Felis Investigations" ? view.title : view.title + " · Felis Investigations";
+    var notice = document.querySelector(".banner, .alert");
     if (key !== lastKey) {
       lastKey = key;
       window.scrollTo(0, 0);
       var heading = document.querySelector("#main h1");
       if (heading) heading.focus();
-    } else if (pageError) {
-      var alert = document.querySelector("[role='alert']");
-      if (alert) alert.focus();
+    } else if (notice) {
+      notice.focus();
+      notice.scrollIntoView({ block: "center" });
     }
     rendering = false;
   }

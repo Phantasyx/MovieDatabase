@@ -301,6 +301,7 @@ input:focus, textarea:focus, select:focus, button:focus-visible, a:focus-visible
   padding: 0.75rem 0.9rem;
   border-radius: 12px;
   margin: 0 0 1rem;
+  scroll-margin-top: 5.5rem;
 }
 .banner { background: #e7f2ec; color: var(--forest); }
 .alert { background: #f8e8e4; color: #6d2c26; }
