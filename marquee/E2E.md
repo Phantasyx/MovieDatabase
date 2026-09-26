@@ -27,5 +27,7 @@ Checked on 26 Sep 2026 against `marquee/dist/` served at `http://127.0.0.1:8080/
 | Reset demo data restores 33 titles, removes the written review, signs out, and restores the seed password | Passed |
 | `#/missing` shows "That page is not in the catalog." | Passed |
 | At 1280 and at 390, the page does not scroll sideways. At 390 the menu opens from the left edge to the right edge, a poster row scrolls inside itself, and Escape closes the menu | Passed |
+| At 768 the menu lists Movies, Plans, Your reviews, Saved, Billing, and Profile. Plans, checkout, billing, profile, and a locked title fit at 1280, 768, and 390 | Passed |
+| The hero image is requested first. Poster files are the size used on screen and load as the rows come into view | Passed |
 
 No Cloudflare deploy was run.

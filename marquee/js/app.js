@@ -149,6 +149,7 @@
       links += link("reviews", "#/reviews", "Your reviews");
       links += link("saved", "#/saved", "Saved");
       links += link("billing", "#/billing", "Billing");
+      links += link("profile", "#/profile", "Profile");
     } else {
       links += link("login", "#/login", "Sign in");
     }
@@ -191,7 +192,7 @@
       lock +
       '<button type="button" class="fav' + (on ? " is-on" : "") + '" data-action="favorite" data-film="' + esc(film.id) + '" aria-pressed="' + (on ? "true" : "false") + '" aria-label="' + esc(label) + '">' + heart() + "</button>" +
       '<a class="poster" href="#/film/' + esc(film.id) + '">' +
-      '<img src="' + esc(film.image) + '" alt="" width="900" height="1200">' +
+      '<img src="' + esc(film.image) + '" alt="" width="480" height="720" loading="lazy" decoding="async">' +
       '<span class="poster-copy"><span class="poster-title">' + esc(film.title) + "</span>" +
       '<span class="poster-meta">' + esc(String(film.year)) + " · " + esc(film.genre) + score + "</span></span></a></div>";
   }
@@ -212,7 +213,7 @@
     if (!film) return "";
     var src = film.hero || film.image;
     return '<section class="hero">' +
-      '<img class="hero-media" src="' + esc(src) + '" alt="" width="1600" height="900">' +
+      '<img class="hero-media" src="' + esc(src) + '" alt="" width="1600" height="900" fetchpriority="high" decoding="async">' +
       '<div class="hero-copy"><p class="kicker">' + esc(film.genre) + " · " + film.year + "</p>" +
       '<h1 tabindex="-1">' + esc(film.title) + "</h1>" +
       '<p class="logline">' + esc(film.logline) + "</p>" +
@@ -302,7 +303,7 @@
       return {
         title: film.title,
         html:
-          '<section class="title-hero"><img src="' + esc(film.hero || film.image) + '" alt="" width="1600" height="900">' +
+          '<section class="title-hero"><img src="' + esc(film.hero || film.image) + '" alt="" width="1600" height="900" fetchpriority="high" decoding="async">' +
           '<div class="title-copy"><p class="kicker"><a href="#/">Movies</a></p><h1 tabindex="-1">' + esc(film.title) + "</h1>" +
           '<ul class="facts"><li>' + film.year + "</li><li>" + esc(film.genre) + "</li><li>" + film.minutes + " min</li></ul>" +
           "<p>" + esc(film.logline) + "</p>" +
@@ -329,7 +330,7 @@
     return {
       title: film.title,
       html:
-        '<section class="title-hero"><img src="' + esc(film.hero || film.image) + '" alt="" width="1600" height="900">' +
+        '<section class="title-hero"><img src="' + esc(film.hero || film.image) + '" alt="" width="1600" height="900" fetchpriority="high" decoding="async">' +
         '<div class="title-copy"><p class="kicker"><a href="#/">Movies</a></p><h1 tabindex="-1">' + esc(film.title) + "</h1>" +
         '<ul class="facts"><li>' + film.year + "</li><li>" + esc(film.genre) + "</li><li>" + film.minutes + " min</li><li>" + esc(score) + "</li>" + quality + "</ul>" +
         "<p>" + esc(film.synopsis) + "</p>" +
