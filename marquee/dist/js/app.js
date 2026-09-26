@@ -1,7 +1,16 @@
 /* Marquee shelf. Hash routes, no network calls. */
 (function () {
+  var FEATURED = "f-balcony";
+  var GENRES = ["Drama", "Mystery", "Adventure", "Comedy", "Documentary", "Romance", "Science fiction"];
+  var ROWS = [
+    { title: "The whole shelf", ids: null },
+    { title: "After dark", ids: ["f-lantern", "f-glass", "f-usher", "f-balcony"] },
+    { title: "People at work", ids: ["f-tide", "f-choir", "f-train", "f-usher"] },
+    { title: "Out of town", ids: ["f-airfield", "f-train", "f-tide"] }
+  ];
   var pageError = "";
   var shelfFilter = { q: "", genre: "all" };
+  var returnHash = "#/";
   var lastKey = null;
   var rendering = false;
 
@@ -17,6 +26,10 @@
   function partsFromHash() {
     var raw = (location.hash || "").replace(/^#/, "");
     return raw.split("?")[0].split("/").filter(Boolean);
+  }
+
+  function noteRequested() {
+    return (location.hash || "").indexOf("note=1") !== -1;
   }
 
   function val(form, name) {
@@ -61,29 +74,8 @@
     return review.author || "Sample reviewer";
   }
 
-  function shell(body, user, parts) {
-    var flash = MarqueeStore.takeFlash();
-    var head = parts[0] || "shelf";
-    function link(id, href, text) {
-      return '<a href="' + href + '"' + (head === id ? ' aria-current="page"' : "") + ">" + text + "</a>";
-    }
-    var links = link("shelf", "#/", "Shelf");
-    if (user) links += link("notes", "#/notes", "Your notes");
-    links += user ? "" : link("login", "#/login", "Log in");
-    var logout = user ? '<button type="button" class="nav-link" data-action="logout">Log out</button>' : "";
-    var notice = "";
-    if (flash) notice += '<p class="banner" role="status" tabindex="-1">' + esc(flash) + "</p>";
-    if (pageError) notice += '<p class="alert" role="alert" tabindex="-1">' + esc(pageError) + "</p>";
-    return (
-      '<header class="mast"><div class="mast-inner">' +
-      '<a class="brand" href="#/">MARQUEE</a>' +
-      '<button class="nav-toggle" type="button" data-action="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>' +
-      '<nav id="site-nav" class="nav" aria-label="Primary">' + links + logout + "</nav>" +
-      "</div></header>" +
-      '<main id="main"><div class="wrap">' + notice + body + "</div></main>" +
-      '<footer class="site-foot"><p>Marquee is an early login-and-review exercise rebuilt as a public demo for <a href="https://phantasyx.com">PhantasyX</a>. The films are sample titles. This is not client work.</p>' +
-      '<p><button type="button" class="text-button" data-action="reset-demo">Reset demo data</button></p></footer>'
-    );
+  function isFiltering() {
+    return !!(shelfFilter.q.trim() || shelfFilter.genre !== "all");
   }
 
   function filteredFilms() {
@@ -91,45 +83,135 @@
     return MarqueeStore.films().filter(function (film) {
       if (shelfFilter.genre !== "all" && film.genre !== shelfFilter.genre) return false;
       if (!q) return true;
-      return (film.title + " " + film.logline + " " + film.genre).toLowerCase().indexOf(q) !== -1;
+      return (film.title + " " + film.logline + " " + film.genre + " " + film.synopsis).toLowerCase().indexOf(q) !== -1;
     });
   }
 
-  function ticket(film) {
-    var avg = average(film.id);
-    var count = MarqueeStore.reviewsFor(film.id).length;
-    var score = avg == null ? "No reviews yet" : (Math.round(avg * 10) / 10).toFixed(1) + " · " + count + (count === 1 ? " review" : " reviews");
-    return '<a class="ticket" href="#/film/' + esc(film.id) + '"><span class="stub">' + esc(String(film.year)) + "</span><span class=\"ticket-body\"><p class=\"meta\">" +
-      esc(film.genre) + " · " + film.minutes + " min</p><h2>" + esc(film.title) + "</h2><p>" + esc(film.logline) + '</p><p class="meta">' + esc(score) + "</p></span></a>";
+  function filmsByIds(ids) {
+    if (!ids) return MarqueeStore.films();
+    return ids.map(function (id) { return MarqueeStore.filmById(id); }).filter(Boolean);
   }
 
-  function shelfView(user) {
-    var genres = ["all"].concat(MarqueeStore.films().map(function (film) { return film.genre; }).filter(function (genre, index, list) {
-      return list.indexOf(genre) === index;
-    }));
+  function creditsList() {
+    return MarqueeStore.films().map(function (film) {
+      return "<li>" + esc(film.title) + ' <a href="' + esc(film.photo) + '">Unsplash</a></li>';
+    }).join("");
+  }
+
+  function shell(body, user) {
+    var flash = MarqueeStore.takeFlash();
+    var parts = partsFromHash();
+    var head = parts[0] || "shelf";
+    function link(id, href, text) {
+      return '<a href="' + href + '"' + (head === id ? ' aria-current="page"' : "") + ">" + text + "</a>";
+    }
+    var links = link("shelf", "#/", "Shelf");
+    if (user) links += link("notes", "#/notes", "Your notes");
+    if (!user) links += link("login", "#/login", "Sign in");
+    var logout = user ? '<button type="button" class="nav-link" data-action="logout">Log out</button>' : "";
+    var who = user ? '<p class="nav-user">Signed in as ' + esc(user.name) + ".</p>" : "";
+    var name = user ? '<span class="who">' + esc(user.name) + "</span>" : "";
+    var notice = "";
+    if (flash) notice += '<p class="banner" role="status" tabindex="-1">' + esc(flash) + "</p>";
+    if (pageError) notice += '<p class="alert" role="alert" tabindex="-1">' + esc(pageError) + "</p>";
+    return (
+      '<header class="top"><div class="top-bar">' +
+      '<a class="brand" href="#/">MARQUEE</a>' +
+      '<nav id="site-nav" class="nav" aria-label="Primary">' + who + links + logout + "</nav>" +
+      '<div class="top-search"><label class="sr" for="q">Search titles</label>' +
+      '<input id="q" type="search" value="' + esc(shelfFilter.q) + '" placeholder="Search titles" autocomplete="off"></div>' +
+      name +
+      '<button class="nav-toggle" type="button" data-action="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>' +
+      "</div></header>" +
+      '<main id="main">' + notice + body + "</main>" +
+      '<footer class="site-foot"><p>Marquee is a portfolio demo from <a href="https://phantasyx.com">PhantasyX</a>. Browse invented titles and leave a note after you sign in. Everything you save stays in this browser.</p>' +
+      '<p><button type="button" class="text-button" data-action="reset-demo">Reset demo data</button></p>' +
+      '<details class="credits"><summary>Photograph credits</summary>' +
+      '<p>These photographs are from Unsplash and used under the <a href="https://unsplash.com/license">Unsplash License</a>. That license does not require credit. The links are here so each picture can be traced.</p><ul>' +
+      creditsList() + "</ul></details></footer>"
+    );
+  }
+
+  function posterCard(film) {
+    var avg = average(film.id);
+    var score = avg == null ? "" : '<span class="poster-score">' + (Math.round(avg * 10) / 10).toFixed(1) + "</span>";
+    return '<a class="poster" href="#/film/' + esc(film.id) + '">' +
+      '<img src="' + esc(film.image) + '" alt="" width="900" height="1200">' +
+      '<span class="poster-copy"><span class="poster-title">' + esc(film.title) + "</span>" +
+      '<span class="poster-meta">' + esc(String(film.year)) + " · " + esc(film.genre) + score + "</span></span></a>";
+  }
+
+  function rowBlock(title, films) {
+    if (!films.length) return "";
+    var cards = films.map(posterCard).join("");
+    return '<section class="row"><div class="row-head"><h2>' + esc(title) + "</h2></div>" +
+      '<div class="row-frame">' +
+      '<button type="button" class="row-nav prev" data-action="row-prev" aria-label="Scroll ' + esc(title) + ' backward"></button>' +
+      '<div class="scroller">' + cards + "</div>" +
+      '<button type="button" class="row-nav next" data-action="row-next" aria-label="Scroll ' + esc(title) + ' forward"></button>' +
+      "</div></section>";
+  }
+
+  function heroBlock() {
+    var film = MarqueeStore.filmById(FEATURED);
+    if (!film) return "";
+    var src = film.hero || film.image;
+    return '<section class="hero">' +
+      '<img class="hero-media" src="' + esc(src) + '" alt="" width="1600" height="900">' +
+      '<div class="hero-copy"><p class="kicker">' + esc(film.genre) + " · " + film.year + "</p>" +
+      '<h1 tabindex="-1">' + esc(film.title) + "</h1>" +
+      '<p class="logline">' + esc(film.logline) + "</p>" +
+      '<p class="actions"><a class="btn btn-light" href="#/film/' + esc(film.id) + '">Open title</a> ' +
+      '<a class="btn btn-ghost" href="#/film/' + esc(film.id) + '?note=1">Leave a note</a></p></div></section>';
+  }
+
+  function chipsBlock() {
+    var genres = ["all"].concat(GENRES);
     var chips = genres.map(function (genre) {
       var pressed = shelfFilter.genre === genre ? "true" : "false";
       var label = genre === "all" ? "All" : genre;
       return '<button type="button" class="chip" data-action="genre" data-genre="' + esc(genre) + '" aria-pressed="' + pressed + '">' + esc(label) + "</button>";
     }).join("");
+    return '<div class="chips" role="group" aria-label="Genre">' + chips + "</div>";
+  }
+
+  function paintRows() {
+    var rows = document.querySelector(".rows");
+    var hero = document.querySelector(".hero");
+    if (!rows) return;
+    if (hero) hero.hidden = isFiltering();
+    rows.innerHTML = isFiltering() ? resultsBlock() : browseBlock();
+    if (isFiltering()) document.title = "Search · Marquee";
+    else {
+      var featured = MarqueeStore.filmById(FEATURED);
+      document.title = featured ? featured.title + " · Marquee" : "Marquee";
+    }
+  }
+
+  function browseBlock() {
+    return ROWS.map(function (row) { return rowBlock(row.title, filmsByIds(row.ids)); }).join("");
+  }
+
+  function resultsBlock() {
     var films = filteredFilms();
-    var grid = films.length ? films.map(ticket).join("") : '<p class="empty">No films match that filter.</p>';
-    var signed = user ? '<p class="meta">Signed in as ' + esc(user.name) + ".</p>" : "";
+    if (!films.length) {
+      return '<h2>Matching titles</h2><p class="empty">Nothing on the shelf matches that search.</p>';
+    }
+    var label = shelfFilter.genre !== "all" ? shelfFilter.genre : "Matching titles";
+    return rowBlock(label, films);
+  }
+
+  function shelfView() {
+    var filtering = isFiltering();
+    var featured = MarqueeStore.filmById(FEATURED);
     return {
-      title: "Marquee",
-      html:
-        '<p class="kicker">Public demo</p><h1 tabindex="-1">A small shelf for writing about movies.</h1>' +
-        '<p class="lede">Browse sample films, read sample reviews, and file your own note after you sign in. Everything stays in this browser.</p>' +
-        '<p class="honest">Rebuilt from an early PHP login project. No production accounts, no mail, and no client stories.</p>' +
-        signed +
-        '<div class="toolbar"><p class="grow"><label for="q">Search the shelf</label><input id="q" type="search" value="' + esc(shelfFilter.q) + '" placeholder="Title or logline"></p></div>' +
-        '<div class="chips" role="group" aria-label="Genre">' + chips + "</div>" +
-        '<div class="shelf">' + grid + "</div>"
+      title: filtering ? "Search" : (featured ? featured.title : "Marquee"),
+      html: (filtering ? "" : heroBlock()) + '<div class="shelf-tools">' + chipsBlock() + '</div><div class="rows">' + (filtering ? resultsBlock() : browseBlock()) + "</div>"
     };
   }
 
   function reviewCard(review) {
-    var tag = review.sample ? ' <span class="sample-tag">Sample review</span>' : "";
+    var tag = review.sample ? ' <span class="sample-tag">Sample note</span>' : "";
     var title = review.title ? "<h3>" + esc(review.title) + "</h3>" : "";
     return '<article class="review"><header><p class="meta">' + esc(authorName(review)) + tag + " · " + esc(formatWhen(review.at)) + "</p>" + stars(review.rating) + "</header>" + title + "<p>" + esc(review.body) + "</p></article>";
   }
@@ -139,25 +221,31 @@
     if (!film) return missingView();
     var reviews = MarqueeStore.reviewsFor(film.id).slice().sort(function (a, b) { return a.at < b.at ? 1 : -1; });
     var avg = average(film.id);
-    var score = avg == null ? "No reviews yet" : (Math.round(avg * 10) / 10).toFixed(1) + " average";
+    var score = avg == null ? "No notes yet" : (Math.round(avg * 10) / 10).toFixed(1) + " average";
     var mine = user ? MarqueeStore.userReview(user.id, film.id) : null;
-    var composer = user
-      ? '<form data-action="save-review" data-film="' + esc(film.id) + '"><fieldset class="card"><legend>' + (mine ? "Edit your review" : "Write a review") + "</legend>" +
+    var composer;
+    if (user && user.role === "reviewer") {
+      composer = '<form id="note" data-action="save-review" data-film="' + esc(film.id) + '"><fieldset class="card"><legend>' + (mine ? "Edit your note" : "Leave a note") + "</legend>" +
         '<fieldset class="stars"><legend>Rating</legend>' + [1, 2, 3, 4, 5].map(function (n) {
           return '<label><input type="radio" name="rating" value="' + n + '"' + (mine && mine.rating === n ? " checked" : "") + "> " + n + "</label>";
         }).join("") + "</fieldset>" +
         '<p><label for="title">Title</label><input id="title" name="title" type="text" maxlength="80" value="' + esc(mine ? mine.title : "") + '"></p>' +
-        '<p><label for="body">Review</label><textarea id="body" name="body" required>' + esc(mine ? mine.body : "") + "</textarea></p>" +
-        '<p><button class="primary" type="submit">Save review</button></p></fieldset></form>'
-      : '<p class="panel">Sign in with a demo account to file a review. <a href="#/login">Log in</a></p>';
+        '<p><label for="body">Note</label><textarea id="body" name="body" required>' + esc(mine ? mine.body : "") + "</textarea></p>" +
+        '<p><button class="btn btn-red" type="submit">Save note</button></p></fieldset></form>';
+    } else if (user) {
+      composer = '<div id="note" class="panel"><p>You are signed in as ' + esc(user.name) + '. This account is for reading the shelf. <a href="#/login">Sign in as Mina Cole</a> if you want to leave a note.</p></div>';
+    } else {
+      composer = '<div id="note" class="panel"><p>Sign in when you want to leave a note on this title. Sample notes above were written for the demo. <a href="#/login">Sign in</a></p></div>';
+    }
     return {
       title: film.title,
       html:
-        '<p class="kicker"><a href="#/">Shelf</a></p><div class="film-top"><h1 tabindex="-1">' + esc(film.title) + "</h1>" +
+        '<section class="title-hero"><img src="' + esc(film.hero || film.image) + '" alt="" width="1600" height="900">' +
+        '<div class="title-copy"><p class="kicker"><a href="#/">Shelf</a></p><h1 tabindex="-1">' + esc(film.title) + "</h1>" +
         '<ul class="facts"><li>' + film.year + "</li><li>" + esc(film.genre) + "</li><li>" + film.minutes + " min</li><li>" + esc(score) + "</li></ul>" +
-        "<p>" + esc(film.synopsis) + "</p></div>" +
-        "<h2>Reviews</h2>" + (reviews.length ? reviews.map(reviewCard).join("") : '<p class="empty">No reviews on this title yet.</p>') +
-        composer
+        "<p>" + esc(film.synopsis) + "</p></div></section>" +
+        '<div class="sheet"><h2>Notes</h2>' + (reviews.length ? reviews.map(reviewCard).join("") : '<p class="empty">No notes on this title yet.</p>') +
+        composer + "</div>"
     };
   }
 
@@ -165,11 +253,14 @@
     var mine = MarqueeStore.reviews().filter(function (review) { return review.userId === user.id; });
     var list = mine.length ? mine.map(function (review) {
       var film = MarqueeStore.filmById(review.filmId);
-      return '<article class="review"><p class="meta"><a href="#/film/' + esc(review.filmId) + '">' + esc(film ? film.title : "Film") + "</a> · " + esc(formatWhen(review.at)) + "</p>" + stars(review.rating) + (review.title ? "<h3>" + esc(review.title) + "</h3>" : "") + "<p>" + esc(review.body) + "</p></article>";
-    }).join("") : '<p class="empty">You have not filed a review in this browser yet.</p>';
+      return '<article class="review"><p class="meta"><a href="#/film/' + esc(review.filmId) + '">' + esc(film ? film.title : "Title") + "</a> · " + esc(formatWhen(review.at)) + "</p>" + stars(review.rating) + (review.title ? "<h3>" + esc(review.title) + "</h3>" : "") + "<p>" + esc(review.body) + "</p></article>";
+    }).join("") : '<p class="empty">You have not left a note in this browser yet.</p>';
+    var lede = user.role === "reviewer"
+      ? "These are the notes you saved on this shelf. Sample notes on a title stay marked as samples."
+      : "This account is for reading. Notes you see on a title were either samples or written by a reviewer account.";
     return {
       title: "Your notes",
-      html: '<p class="kicker">' + esc(user.name) + '</p><h1 tabindex="-1">Your notes</h1><p class="lede">Reviews you save are labeled with your demo name. Sample shelf reviews stay marked as samples.</p>' + list
+      html: '<div class="sheet plain"><p class="kicker">' + esc(user.name) + '</p><h1 tabindex="-1">Your notes</h1><p class="lede">' + lede + "</p>" + list + "</div>"
     };
   }
 
@@ -177,44 +268,46 @@
     var note = user ? '<p class="hint">Signed in as ' + esc(user.name) + ". You can switch accounts.</p>" : "";
     var cards = MarqueeStore.users().map(function (account) {
       var changed = account.password !== account.seedPassword ? " (changed in this browser)" : "";
-      var role = account.role === "reviewer" ? "Demo reviewer" : "Demo reader";
-      return '<article class="account panel"><h3>' + esc(account.name) + "</h3><p class=\"hint\">" + role + "</p><p class=\"cred\">" + esc(account.email) + "<br>" + esc(account.password) + esc(changed) + '</p><button type="button" class="secondary" data-action="fill-login" data-email="' + esc(account.email) + '" data-password="' + esc(account.password) + '">Use this account</button></article>';
+      var role = account.role === "reviewer"
+        ? "Leaves notes on titles."
+        : "Reads the shelf and does not leave notes.";
+      return '<article class="account panel"><h3>' + esc(account.name) + "</h3><p class=\"hint\">" + role + "</p><p class=\"cred\">" + esc(account.email) + "<br>" + esc(account.password) + esc(changed) + '</p><button type="button" class="btn btn-ghost" data-action="fill-login" data-email="' + esc(account.email) + '" data-password="' + esc(account.password) + '">Use this account</button></article>';
     }).join("");
     return {
-      title: "Log in",
+      title: "Sign in",
       html:
-        '<div class="split"><div><p class="kicker">Demo access</p><h1 tabindex="-1">Log in</h1>' + note +
-        '<p class="hint">These passwords are public. They only unlock the sample shelf in this browser.</p>' +
+        '<div class="sheet auth"><div><p class="kicker">Demo access</p><h1 tabindex="-1">Sign in</h1>' + note +
+        '<p class="lede">Use a demo account if you want to leave a note on a title. These passwords are public, and they only work in this browser.</p>' +
         '<form data-action="login"><fieldset class="card"><legend>Sign in</legend>' +
         '<p><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="username" required></p>' +
         '<p><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required></p>' +
-        '<p class="actions"><button class="primary" type="submit">Log in</button> <a href="#/reset">Lost password</a></p></fieldset></form></div>' +
+        '<p class="actions"><button class="btn btn-red" type="submit">Sign in</button> <a href="#/reset">New password</a></p></fieldset></form></div>' +
         '<div><h2>Demo accounts</h2><div class="accounts">' + cards + "</div></div></div>"
     };
   }
 
   function resetView() {
     return {
-      title: "Reset password",
+      title: "New password",
       html:
-        '<p class="kicker">No email is sent</p><h1 tabindex="-1">Choose a new demo password</h1>' +
-        '<p class="lede">A hosted app would mail a one-time link. Here, a known demo address can set a new password in this browser.</p>' +
+        '<div class="sheet narrow"><p class="kicker">Stays in this browser</p><h1 tabindex="-1">Choose a new password</h1>' +
+        '<p class="lede">Marquee does not send email. If you know a demo address, you can set a new password here.</p>' +
         '<form data-action="reset-password"><fieldset class="card"><legend>Password</legend>' +
         '<p><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="username" required></p>' +
         '<p><label for="password">New password</label><input id="password" name="password" type="password" autocomplete="new-password" required></p>' +
         '<p><label for="password2">Repeat password</label><input id="password2" name="password2" type="password" autocomplete="new-password" required></p>' +
         '<p class="hint">At least 8 characters.</p>' +
-        '<p class="actions"><button class="primary" type="submit">Update password</button> <a href="#/login">Cancel</a></p></fieldset></form>'
+        '<p class="actions"><button class="btn btn-red" type="submit">Update password</button> <a href="#/login">Cancel</a></p></fieldset></form></div>'
     };
   }
 
   function missingView() {
-    return { title: "Not on the shelf", html: '<h1 tabindex="-1">That page is not on the shelf.</h1><p><a class="button secondary" href="#/">Back to the shelf</a></p>' };
+    return { title: "Not on the shelf", html: '<div class="sheet narrow"><h1 tabindex="-1">That page is not on the shelf.</h1><p><a class="btn btn-light" href="#/">Back to the shelf</a></p></div>' };
   }
 
   function viewFor(parts, user) {
     var head = parts[0] || "shelf";
-    if (head === "shelf") return shelfView(user);
+    if (head === "shelf") return shelfView();
     if (head === "film") return filmView(parts[1], user);
     if (head === "notes") return notesView(user);
     if (head === "login") return loginView(user);
@@ -244,14 +337,21 @@
       return;
     }
     var view = viewFor(parts, user);
-    document.getElementById("app").innerHTML = shell(view.html, user, parts);
+    document.getElementById("app").innerHTML = shell(view.html, user);
     document.title = view.title === "Marquee" ? "Marquee" : view.title + " · Marquee";
     var notice = document.querySelector(".banner, .alert");
+    var note = document.getElementById("note");
     if (key !== lastKey) {
       lastKey = key;
-      window.scrollTo(0, 0);
-      var heading = document.querySelector("#main h1");
-      if (heading) heading.focus();
+      if (note && noteRequested()) {
+        note.scrollIntoView({ block: "start" });
+        var focusable = note.querySelector("textarea, a, button");
+        if (focusable) focusable.focus();
+      } else {
+        window.scrollTo(0, 0);
+        var heading = document.querySelector("#main h1");
+        if (heading) heading.focus();
+      }
     } else if (notice) {
       notice.focus();
       notice.scrollIntoView({ block: "center" });
@@ -266,6 +366,11 @@
   }
 
   function onClick(event) {
+    var loginLink = event.target.closest("a[href='#/login']");
+    if (loginLink) {
+      var current = partsFromHash();
+      returnHash = current[0] === "film" && current[1] ? "#/film/" + current[1] : "#/";
+    }
     var btn = event.target.closest("[data-action]");
     if (!btn) return;
     var action = btn.dataset.action;
@@ -276,22 +381,29 @@
       btn.setAttribute("aria-expanded", open ? "true" : "false");
       return;
     }
+    if (action === "row-prev" || action === "row-next") {
+      var scroller = btn.parentElement.querySelector(".scroller");
+      if (!scroller) return;
+      var amount = Math.max(220, scroller.clientWidth * 0.8);
+      scroller.scrollBy({ left: action === "row-next" ? amount : -amount, behavior: "smooth" });
+      return;
+    }
     if (action === "genre") {
       shelfFilter.genre = btn.dataset.genre || "all";
       lastKey = null;
       render();
-      var field = document.getElementById("q");
-      if (field) field.focus();
+      var pressed = document.querySelector('.chip[aria-pressed="true"]');
+      if (pressed) pressed.focus();
       return;
     }
     if (action === "logout") {
       MarqueeStore.logout();
-      MarqueeStore.setFlash("Signed out. Reviews you wrote are still in this browser.");
+      MarqueeStore.setFlash("Signed out. Notes you wrote are still in this browser.");
       navigate("#/");
       return;
     }
     if (action === "reset-demo") {
-      if (!window.confirm("Reset the sample shelf and any reviews saved in this browser?")) return;
+      if (!window.confirm("Reset the sample shelf and any notes saved in this browser?")) return;
       MarqueeStore.reset();
       shelfFilter = { q: "", genre: "all" };
       MarqueeStore.setFlash("Demo shelf restored.");
@@ -316,8 +428,10 @@
     if (action === "login") {
       result = MarqueeStore.login(val(form, "email"), val(form, "password"));
       if (!result.ok) { pageError = result.error; render(); return; }
+      var dest = returnHash || "#/";
+      returnHash = "#/";
       MarqueeStore.setFlash("Signed in as " + result.user.name + ".");
-      navigate("#/");
+      navigate(dest);
       return;
     }
     if (action === "reset-password") {
@@ -336,19 +450,26 @@
         body: val(form, "body")
       });
       if (!result.ok) { pageError = result.error; render(); return; }
-      succeed(result.updated ? "Review updated." : "Review saved in this browser.");
+      succeed(result.updated ? "Note updated." : "Note saved in this browser.");
     }
   }
 
   document.addEventListener("click", onClick);
   document.addEventListener("submit", onSubmit);
   document.addEventListener("input", function (event) {
-    if (event.target.id === "q") {
-      shelfFilter.q = event.target.value;
-      var grid = document.querySelector(".shelf");
-      if (!grid) return;
-      var films = filteredFilms();
-      grid.innerHTML = films.length ? films.map(ticket).join("") : '<p class="empty">No films match that filter.</p>';
+    if (event.target.id !== "q") return;
+    shelfFilter.q = event.target.value;
+    if (document.querySelector(".rows")) {
+      paintRows();
+      return;
+    }
+    if (!shelfFilter.q.trim()) return;
+    navigate("#/");
+    var field = document.getElementById("q");
+    if (field) {
+      field.focus();
+      var end = field.value.length;
+      if (field.setSelectionRange) field.setSelectionRange(end, end);
     }
   });
   document.addEventListener("keydown", function (event) {

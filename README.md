@@ -1,6 +1,6 @@
 # Marquee
 
-Marquee is the public demo in this repository: a small movie-review shelf with demo sign-in. It is an early PHP login project rebuilt as a static site for [PhantasyX](https://phantasyx.com).
+Marquee is the public demo in this repository: a dark film shelf with poster rows, demo sign-in, and notes that stay in the browser. It is an early PHP login project rebuilt as a static site for [PhantasyX](https://phantasyx.com). Photographs are from Unsplash.
 
 The films are sample titles. Sample reviews are labeled as samples. This is not client work, and it does not use production accounts.
 
@@ -16,10 +16,10 @@ Open [http://localhost:8080/](http://localhost:8080/). `sh marquee/build.sh` wri
 
 Demo accounts, also listed on the sign-in screen:
 
-| Email | Password |
-| --- | --- |
-| mina@marquee.demo | demo-reviewer |
-| sam@marquee.demo | demo-reader |
+| Email | Password | Can do |
+| --- | --- | --- |
+| mina@marquee.demo | demo-reviewer | Leave notes |
+| sam@marquee.demo | demo-reader | Read the shelf |
 
 ## Build output
 

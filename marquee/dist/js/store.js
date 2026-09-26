@@ -50,7 +50,7 @@
     } catch (e) {
       saved = null;
     }
-    if (!saved || saved.version !== 1 || !Array.isArray(saved.users) || !Array.isArray(saved.films) || !Array.isArray(saved.reviews)) {
+    if (!saved || saved.version !== 2 || !Array.isArray(saved.users) || !Array.isArray(saved.films) || !Array.isArray(saved.reviews)) {
       state = window.MarqueeData.seed();
       persist();
     } else {
@@ -121,13 +121,17 @@
   }
 
   function saveReview(userId, filmId, input) {
-    if (!filmById(filmId)) return { ok: false, error: "That film is not on the shelf." };
+    var author = state.users.find(function (u) { return u.id === userId; });
+    if (!author || author.role !== "reviewer") {
+      return { ok: false, error: "This demo account can read notes, not write them." };
+    }
+    if (!filmById(filmId)) return { ok: false, error: "That title is not on the shelf." };
     var rating = Number(input.rating);
     var title = String(input.title || "").trim();
     var body = String(input.body || "").trim();
     if (![1, 2, 3, 4, 5].includes(rating)) return { ok: false, error: "Choose a rating from 1 to 5." };
-    if (!body) return { ok: false, error: "Write a few sentences before saving." };
-    if (title.length > 80 || body.length > 1200) return { ok: false, error: "Keep the review shorter for this demo." };
+    if (!body) return { ok: false, error: "Write the note before saving." };
+    if (title.length > 80 || body.length > 1200) return { ok: false, error: "Keep the note shorter for this demo." };
     var existing = userReview(userId, filmId);
     if (existing) {
       existing.rating = rating;

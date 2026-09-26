@@ -1,8 +1,8 @@
 # Marquee
 
-Marquee is a public movie-review shelf. It is an early PHP login project rebuilt as a static demo for [PhantasyX](https://phantasyx.com). The films and the reviews that ship with the shelf are samples. This is not client work.
+Marquee is a film shelf you browse like a streaming home page. It is an early PHP login project rebuilt as a portfolio demo for [PhantasyX](https://phantasyx.com). The titles are invented. Sample notes are labeled so they are not mistaken for yours. This is not client work.
 
-Sign-in, reviews, and password changes stay in the browser. Nothing is emailed and nothing is sent to a server.
+Sign-in, notes, and password changes stay in the browser. Nothing is emailed and nothing is sent to a server.
 
 The public address is [https://marquee.phantasyx.com](https://marquee.phantasyx.com).
 
@@ -19,12 +19,16 @@ Open [http://localhost:8080/](http://localhost:8080/). `dist/` is the same shelf
 
 ### Demo accounts
 
-| Name | Email | Password | Starts with |
+| Name | Email | Password | What the account can do |
 | --- | --- | --- | --- |
-| Mina Cole | mina@marquee.demo | demo-reviewer | an empty personal notebook |
-| Sam Ortiz | sam@marquee.demo | demo-reader | an empty personal notebook |
+| Mina Cole | mina@marquee.demo | demo-reviewer | Leave notes on titles |
+| Sam Ortiz | sam@marquee.demo | demo-reader | Read the shelf |
 
-Sample reviews already on the shelf are labeled **Sample review**. They are not accounts. A password change or a review you write is stored only in that browser. **Reset demo data** restores the sample shelf.
+Sample notes already on a title are labeled **Sample note**. They are not accounts. A password change or a note you write is stored only in that browser. **Reset demo data** restores the sample shelf.
+
+## Photographs
+
+Every title uses a photograph from [Unsplash](https://unsplash.com). The [Unsplash License](https://unsplash.com/license) allows this use and does not require attribution. The shelf still lists a source link for each picture under Photograph credits. The files live in `images/` and are copied into `dist/images/` by the build. They are not generated images.
 
 What was exercised in the browser is written in [E2E.md](E2E.md).
 
@@ -44,6 +48,7 @@ That writes `dist/`:
 - `dist/favicon.svg`
 - `dist/robots.txt`
 - `dist/_headers`
+- `dist/images/`
 
 `wrangler.jsonc` publishes `dist/`. Notes in this folder stay out of the upload.
 

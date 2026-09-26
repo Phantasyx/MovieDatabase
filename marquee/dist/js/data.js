@@ -1,7 +1,7 @@
 /* Sample shelf for the Marquee public demo. These films are invented. */
 (function () {
   var SEED = {
-    version: 1,
+    version: 2,
     users: [
       {
         id: "u-mina",
@@ -27,6 +27,8 @@
         year: 2019,
         minutes: 104,
         genre: "Drama",
+        image: "images/tide.jpg",
+        photo: "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13",
         logline: "A harbor clerk starts recognizing the names in a book of boats that never returned.",
         synopsis: "Every Monday, Nia updates a handwritten registry of vessels that missed their window. The work is dull until a name repeats from her own childhood, attached to a boat she watched leave. The film stays inside the office, the dock, and one kitchen table, and it treats memory as a filing problem."
       },
@@ -36,6 +38,8 @@
         year: 2021,
         minutes: 98,
         genre: "Mystery",
+        image: "images/lantern.jpg",
+        photo: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da",
         logline: "A night librarian keeps checking out a map the building does not own.",
         synopsis: "After midnight, the same patron asks for a folded coastal map. The drawer that should hold it is empty, then the map is in his coat, then it is back on the desk with a street added in pencil. The librarian stops calling the police and starts walking the new street."
       },
@@ -45,6 +49,8 @@
         year: 2016,
         minutes: 112,
         genre: "Adventure",
+        image: "images/airfield.jpg",
+        photo: "https://images.unsplash.com/photo-1500382017468-9049fed747ef",
         logline: "Two siblings follow a map their grandmother drew on the backs of grocery receipts.",
         synopsis: "The receipts are out of order and some of the stores have closed. What begins as a weekend errand becomes a route through county roads, a drained reservoir, and a field where someone once marked a runway with bedsheets. Nobody is chased. The suspense is whether the last receipt still means anything."
       },
@@ -54,6 +60,8 @@
         year: 2023,
         minutes: 91,
         genre: "Comedy",
+        image: "images/choir.jpg",
+        photo: "https://images.unsplash.com/photo-1517433670267-08bbd4be890f",
         logline: "A midnight bakery crew rehearses a wedding toast nobody asked them to give.",
         synopsis: "They have the night shift, one working oven, and a speech drafted on the back of a flour invoice. The wedding is for a regular who always buys the last rye. The jokes stay inside the work: timers, pride, and the fear of saying something sincere while wearing a hairnet."
       },
@@ -63,6 +71,8 @@
         year: 2018,
         minutes: 86,
         genre: "Documentary",
+        image: "images/train.jpg",
+        photo: "https://images.unsplash.com/photo-1474487548417-781cb71495f3",
         logline: "A town votes on whether to keep the last weekday train.",
         synopsis: "This sample documentary sits in waiting rooms, a high-school gym, and the cab of the evening train. Riders, a dispatcher, and a shop owner argue about a schedule that has already been cut once. The film does not pretend the vote will save the route. It watches people practice having a say."
       },
@@ -72,6 +82,9 @@
         year: 2020,
         minutes: 101,
         genre: "Romance",
+        image: "images/balcony.jpg",
+        hero: "images/hero.jpg",
+        photo: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba",
         logline: "Two ushers trade shifts and start leaving notes in the seat-back pockets.",
         synopsis: "The notes are practical at first: a broken armrest, a patron who needs the aisle. They get longer. The theater is half empty and the film they are showing is not the point. What matters is who finds the note before the lights come up."
       },
@@ -81,6 +94,8 @@
         year: 2024,
         minutes: 118,
         genre: "Science fiction",
+        image: "images/glass.jpg",
+        photo: "https://images.unsplash.com/photo-1461511669078-d46bf351cd6e",
         logline: "Tomorrow's forecast starts arriving with yesterday's voices folded into it.",
         synopsis: "A small forecast office notices the radar speaking in fragments of old phone calls. The science stays tactile: printouts, a roof sensor, a kettle. The voices are not a villain. They are weather that remembered something on the way down."
       },
@@ -90,6 +105,8 @@
         year: 2014,
         minutes: 95,
         genre: "Drama",
+        image: "images/usher.jpg",
+        photo: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1",
         logline: "On closing night, an usher walks every aisle and remembers who used to sit where.",
         synopsis: "The building is already sold. There is one last showing and a flashlight with a weak battery. The usher does not make a speech. He straightens seats, returns a scarf, and leaves the house lights on a little longer than the manual says."
       }
