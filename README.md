@@ -1,69 +1,56 @@
-# Felis Investigations
+# Marquee
 
-Felis Investigations is a small case desk for discreet inquiries: staff open files, write notes and surveillance reports, and clients see only their own cases. This repository started as a 2017 PHP class project. The portfolio version is a static demo that can be copied onto a marketing site.
+Marquee is the public demo in this repository: a small movie-review shelf with demo sign-in. It is an early PHP login project rebuilt as a static site for [PhantasyX](https://phantasyx.com).
 
-The showcase does not need PHP, MySQL, or a build step. Demo accounts and case files live in the browser. Nothing is emailed, and nothing is sent to a server.
+The films are sample titles. Sample reviews are labeled as samples. This is not client work, and it does not use production accounts.
 
-## Run the demo locally
+The PHP tree (`*.php`, `lib/`, `post/`, `tests/`, `vendor/`) is the archived coursework that this repo started from: a login-and-records desk. Database passwords are not stored in source. That archive is not the portfolio demo.
 
-From the repository root:
+## Run Marquee locally
 
 ```bash
-python3 -m http.server 8080 --directory demo
+python3 -m http.server 8080 --directory marquee
 ```
 
-Open [http://localhost:8080/](http://localhost:8080/).
+Open [http://localhost:8080/](http://localhost:8080/). There is no build step. Output to publish is the `marquee/` folder.
 
-There is no compile step. `demo/` is the site to publish.
+Demo accounts, also listed on the sign-in screen:
 
-### Demo accounts
-
-These passwords are public and exist only in the static demo.
-
-| Role | Email | Password |
-| --- | --- | --- |
-| Admin | avery@felis.demo | demo-admin |
-| Staff | harvey@felis.demo | demo-staff |
-| Client | levon@felis.demo | demo-client |
-| Client | mary@felis.demo | demo-client |
-
-Accounts created inside the demo get the password `demo-new-user`. Resetting a password updates it in that browser only. Use **Reset demo data** in the footer to restore the seed.
+| Email | Password |
+| --- | --- |
+| mina@marquee.demo | demo-reviewer |
+| sam@marquee.demo | demo-reader |
 
 ## Copy to phantasyx.com
 
-Copy the `demo/` folder as a static site (site root, or a subpath such as `/examples/felis/`). Hash routes (`#/cases`, `#/login`) work without server rewrites.
+Copy `marquee/` and publish it as a static directory (site root, or a path such as `/examples/marquee/`).
 
 Safe to copy:
 
-- `demo/index.html`
-- `demo/css/`
-- `demo/js/`
-- `demo/favicon.svg`
-- `demo/robots.txt`
-- `demo/_headers` (Cloudflare Pages / Netlify response headers; optional)
-- `demo/.nojekyll` (keeps GitHub Pages from running Jekyll)
+- `marquee/index.html`
+- `marquee/css/`
+- `marquee/js/`
+- `marquee/favicon.svg`
+- `marquee/robots.txt`
+- `marquee/_headers`
+- `marquee/.nojekyll`
+- `marquee/wrangler.jsonc` if you deploy with Workers
+- `marquee/.github/` only when that folder is its own repository
 
-Do not publish the legacy PHP tree (`*.php`, `lib/`, `post/`, `tests/`, `vendor/`) as the marketing example. It expects a private database and is kept as the original app.
+Do not publish the PHP archive as the marketing example.
 
-`demo/_headers` sets `X-Frame-Options: SAMEORIGIN`. A page on the same host can frame the demo. Remove that file if the host already sets headers.
+## Hosting
 
-## GitHub Pages
+- **This repository, GitHub Pages:** `.github/workflows/pages.yml` publishes `marquee/` after Pages is set to GitHub Actions. This environment cannot turn that setting on, so there is no live URL until then. The site will be `https://<user>.github.io/<repository>/`.
+- **Its own repository:** see `marquee/README.md`. Creating `Phantasyx/marquee` needs a token that can create repositories. This checkout cannot.
+- **Cloudflare Workers:** from `marquee/`, run `npx wrangler@4 deploy`. The config serves static assets only.
 
-`.github/workflows/pages.yml` publishes `demo/` with GitHub Actions after it is on `master`. In the repository settings, set Pages to **GitHub Actions**. This checkout does not turn Pages on, so there is no live demo URL until that setting is saved. The site will be:
+## Archived PHP app
 
-`https://<user>.github.io/<repository>/`
+Pages are marked `noindex`. A database connection is opened only when all of these are set:
 
-## Legacy PHP app
-
-The original pages remain for reference. They are marked `noindex`. Database settings are environment variables, not values checked into the repo:
-
-- `FELIS_DB_DSN` (example: `mysql:host=127.0.0.1;dbname=felis`)
+- `FELIS_DB_DSN`
 - `FELIS_DB_USER`
 - `FELIS_DB_PASSWORD`
-- `FELIS_DB_PREFIX` (default `felis_`)
-- `FELIS_DB_NAME` (PHPUnit connection name, default `felis`)
-- `FELIS_EMAIL`
-- `FELIS_ROOT` (URL path prefix, empty for a local server)
-- `FELIS_TIMEZONE` (default `America/Detroit`)
 
-A schema is not included. The supported way to show the product is the static demo.
+Optional: `FELIS_DB_PREFIX` (default `felis_`), `FELIS_DB_NAME`, `FELIS_EMAIL`, `FELIS_ROOT`, `FELIS_TIMEZONE`. No schema is included. Marquee does not use them.
