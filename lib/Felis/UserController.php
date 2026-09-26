@@ -15,7 +15,6 @@ class UserController
     public function __construct(Site $site, User $user, array $post)
     {
         $root = $site->getRoot();
-        var_dump($post);
         if (isset($post['cancel'])) {
             $this->redirect = "$root/users.php";
         }

@@ -7,7 +7,7 @@
     <test8_clientcase id="25" client="9" agent="8" number="15-0011"
                       summary="case summary" status="C" />
 
-    <test8_user id="8" email="cbowen@cse.msu.edu" name="Owen, Charles"
+    <test8_user id="8" email="owen@felis.example" name="Owen, Charles"
                 phone="" address="" notes="" password=""
                 joined="2015-01-01 23:50:26" role="A" />
     <test8_user id="9" email="bart@bartman.com" name="Simpson, Bart"

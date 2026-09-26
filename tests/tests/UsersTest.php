@@ -37,7 +37,7 @@ class UsersTest extends \PHPUnit_Extensions_Database_TestCase
      */
     public function getConnection()
     {
-        return $this->createDefaultDBConnection(self::$site->pdo(), 'hilljor2');
+        return $this->createDefaultDBConnection(self::$site->pdo(), getenv('FELIS_DB_NAME') ?: 'felis');
     }
     public function test_construct() {
         $users = new Felis\Users(self::$site);
@@ -56,26 +56,8 @@ class UsersTest extends \PHPUnit_Extensions_Database_TestCase
     public function test_login() {
         $users = new Felis\Users(self::$site);
 
-        // Test a valid login based on email address
-        $user = $users->login("dudess@dude.com", "87654321");
-        $this->assertInstanceOf('Felis\User', $user);
-        $this->assertContains("Dudess", $user->getName());
-        $this->assertContains("111-222-3333", $user->getPhone());
-        $this->assertContains("Dudess", $user->getAddress());
-        $this->assertContains("Dudess", $user->getNotes());
-
-       $this->assertEquals("1421988626", $user->getJoined());
-        $this->assertContains("S", $user->getRole());
-
-
-
-
-        // Test a valid login based on email address
-        $user = $users->login("cbowen@cse.msu.edu", "super477");
-        $this->assertInstanceOf('Felis\User', $user);
-
-        // Test a failed login
-        $user = $users->login("dudess@dude.com", "wrongpw");
+        // Success-path checks that embedded course passwords were removed with the public fixtures.
+        $user = $users->login("dudess@dude.com", "not-a-password");
         $this->assertNull($user);
 
     }
@@ -117,7 +99,7 @@ class UsersTest extends \PHPUnit_Extensions_Database_TestCase
             'phone' => '5555555555',
             'address' => 'leduch',
             'notes' => 'testing',
-            'password' => 'asdfasdf',
+            'password' => '',
             'joined' => '2017-02-15 22:41:13',
             'role' => 'A'
         );
@@ -126,7 +108,7 @@ class UsersTest extends \PHPUnit_Extensions_Database_TestCase
 
         $this->assertFalse($users->update($hackuser));
 
-        $hackuser->setEmail("cbowen@cse.msu.edu");
+        $hackuser->setEmail("owen@felis.example");
 
         $this->assertFalse($users->update($hackuser));
 

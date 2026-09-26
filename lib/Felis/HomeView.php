@@ -26,6 +26,7 @@ class HomeView extends View
      */
     protected function headerAdditional() {
         return <<<HTML
+<p>The portfolio showcase is the <a href="demo/">static demo</a>. It runs without PHP or a database.</p>
 <p>Welcome to Felis Investigations!</p>
 <p>Domestic, divorce, and carousing investigations conducted without publicity. People and cats shadowed
 	and investigated by expert inspectors. Katnapped kittons located. Missing cats and witnesses located.

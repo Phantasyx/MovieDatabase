@@ -29,8 +29,8 @@ class LostPasswordController
         $validator = $validators->newValidator($userid);
 
 
-        $link = "http://webdev.cse.msu.edu"  . $this->site->getRoot() .
-            '/password-validate.php?v=' . $validator;
+        $root = rtrim($this->site->getRoot(), '/');
+        $link = $root . '/password-validate.php?v=' . rawurlencode($validator);
         $from = $this->site->getEmail();
         $subject = "Reset password";
         $message = <<<MSG
