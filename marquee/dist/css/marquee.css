@@ -571,14 +571,33 @@ button:disabled { opacity: 0.65; cursor: default; }
 
 @media (max-width: 800px) {
   .sheet.auth { grid-template-columns: 1fr; }
-  .hero { min-height: 0; }
-  .hero-media { position: relative; height: 58vw; min-height: 220px; }
+  .hero,
+  .title-hero {
+    min-height: 0;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-media,
+  .title-hero img {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+  }
+  .hero-media { height: 58vw; min-height: 220px; }
+  .title-hero img { height: 52vw; min-height: 200px; }
   .hero::after { background: linear-gradient(180deg, rgba(0, 0, 0, 0.15), #141414 92%); }
-  .hero-copy { margin-top: -4.5rem; padding-top: 0; }
-  .title-hero { min-height: 0; }
-  .title-hero img { position: relative; height: 52vw; min-height: 200px; }
   .title-hero::after { background: linear-gradient(180deg, rgba(0, 0, 0, 0.05), #141414 90%); }
-  .title-copy { margin-top: -3.5rem; }
+  .hero-copy,
+  .title-copy {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-top: -3.5rem;
+    padding-top: 0;
+  }
 }
 
 @media (max-width: 1040px) {
@@ -609,6 +628,13 @@ button:disabled { opacity: 0.65; cursor: default; }
   .poster-wrap { flex-basis: 46vw; }
   .plan-grid { grid-template-columns: 1fr; }
   h1 { font-size: clamp(1.8rem, 9vw, 2.6rem); }
+  .hero-copy .actions,
+  .title-copy .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-copy .actions .btn,
+  .title-copy .actions .btn { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
