@@ -33,6 +33,7 @@ Demo accounts, also listed on the sign-in screen:
 - `marquee/dist/favicon.svg`
 - `marquee/dist/robots.txt`
 - `marquee/dist/_headers`
+- `marquee/dist/images/`
 
 Browser notes are in `marquee/E2E.md`. Do not publish the PHP archive as the marketing example.
 
